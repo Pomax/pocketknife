@@ -98,4 +98,5 @@ functions chain, unless otherwise indicated:
   * listenOnce(eventName, function) - idem ditto, but only once.
   * classes() - passthrough, use as .classes().add(name), .classes().remove(name), and
                 .classes().toggle(name).
+  * foreach(function) - call function once for each element, passing the element as parameter. 
 
