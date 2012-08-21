@@ -85,9 +85,10 @@ except for those indicated:
 ### set API
 
 When find(selector) matches multiple elements, you get a set instead of a single
-element. This is different from jQuery. Sets have a slightly smaller API, since
+element. Consider this a normal JavaScript array, with a few more functions,
+because that's literally what it is. Sets have a smaller API than elements, since
 functions that get values for single elements don't make sense for sets. These
-functions chain unless otherwise indicated:
+functions chain, unless otherwise indicated:
 
   * css(propname, value) - set CSS property value for all elements in the set.
   * show(yesorno) - show (or not) all elements
