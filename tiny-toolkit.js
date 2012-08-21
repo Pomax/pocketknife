@@ -281,7 +281,13 @@
           remove: function(str) {
             for(var i=0, last=elements.length; i<last; i++) {
               elements[i].classes().remove(str); }
-            return elements; }}; }
+            return elements; },
+          // set.classes().toggle(...)
+          toggle: function(str) {
+            for(var i=0, last=elements.length; i<last; i++) {
+              elements[i].classes().toggle(str); }
+            return elements; }};
+      }
       return elements.__classes; };
     
     // chaining return
