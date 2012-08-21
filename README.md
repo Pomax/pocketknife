@@ -12,7 +12,7 @@ most of the practical work it does... So, use your best judgement?
 Note that I make no pretenses at backward compatibility.
 This library is only for browsers that support clientBoundingRect
 and classList, etc., which rules out all the ancient browsers. I
-Look forward to the days when we look back at this period and
+look forward to the days when we look back at this period and
 laugh at the legacy support some of us were forced to do.
 
 - Pomax
