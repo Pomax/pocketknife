@@ -50,7 +50,7 @@
    * Insanely simple templating - replace {{moo}} with replacements.moo,
    * then use this template as the content for <element>.
    */
-  var template = function(element, templateName, replacements) {
+  var template = function(templateName, replacements) {
     if (!templates[templateName]) { templates[templateName] = get(templateName+".tpl.html"); }
     var replaced = templates[templateName], replacement;
     for(prop in replacements) {
@@ -82,9 +82,7 @@
      * template loading
      */
     bind(e, "template", function(name,macros) {
-      var thtml = template(e,name,macros);
-      e.html(thtml);
-      return e;
+      return e.html(template(name,macros));
     });
 
     /**
