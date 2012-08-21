@@ -18,6 +18,12 @@
 **/
 (function(window, document, body){
   
+  (function(){
+    var ttkh = document.createElement("style");
+    ttkh.type = "text/css";
+    ttkh.innerHTML = ".tiny-toolkit-hidden{display:none!important;visibility:hidden!important;opacity:0!important;}";
+    document.head.appendChild(ttkh); }());
+  
   /**
    * synchronous ajax
    */
@@ -102,7 +108,9 @@
       return {
         add: function(cls) { e.classList.add(cls); return e; },
         remove: function(cls) { e.classList.remove(cls); return e; },
-        toggle: function(state) { e.classList.toggle(state); return e; }
+        toggle: function(state) { e.classList.toggle(state); return e; },
+        // breaks chaining
+        contains: function(cls) { return e.classList.contains(cls); }
       };
     });
 
@@ -110,12 +118,13 @@
      * show/hide - note that this uses "block" by default.
      */
     bind(e, "show", function(yes, type) {
-      e.style.display = (yes? (type? type : "block") : "none");
+      if(yes) { e.classes().remove("tiny-toolkit-hidden"); } 
+      else { e.classes().add("tiny-toolkit-hidden"); }
       return e;
     });
 
     bind(e, "toggle", function() {
-      e.show(e.style.display === "none");
+      e.show(e.classes().contains("tiny-toolkit-hidden"));
       return e;
     });
 

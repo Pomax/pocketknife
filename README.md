@@ -59,8 +59,10 @@ except for those indicated:
                  left, right, top, bottom, width, and height.
   * classes() - returns a function object for CSS class modifications. This function
                 interrupts chaining, returning an object with functions: add(name),
-                remove(name) and toggle(name). These functions resume chaining.
-  * show(yesorno) - true = display:block, false = display:none
+                remove(name) and toggle(name). These functions resume chaining. There
+                is also a function contains(name), which returns true or false. This
+                function obviously breaks chaining.
+  * show(yesorno) - true = show element on page, false = hide element.
   * toggle() - flip between show() states
   * html() - get innerHTML
   * html(htmltext) set innerHTML
