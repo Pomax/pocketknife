@@ -46,7 +46,7 @@ extended HTML elements have the following API. All function calls chain,
 except for those indicated:
 
   * find(selector) - find inside the HTML's DOM fragment
-  * template(name, substitutions) - create an extend()ed HTML element from
+  * template(name, substitutions) - fill this HTML element with a fragment from
                                     a template file (found as name + ".tpl.html"),
                                     with {{label}} placeholders replaced by
                                     what you indicate as substitution string
