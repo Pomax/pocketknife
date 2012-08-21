@@ -15,7 +15,7 @@ and classList, etc., which rules out all the ancient browsers. I
 look forward to the days when we look back at this period and
 laugh at the legacy support some of us were forced to do.
 
-- Pomax
+— Pomax
 
 API
 ---
