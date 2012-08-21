@@ -18,6 +18,11 @@
 **/
 (function(window, document, body){
   
+  /**
+   * set up a special CSS rule for hiding elements. Rather than change the
+   * element's CSS properties, we simply tack this class onto any element
+   * that needs to not be shown, or remove it to reveal the element again.
+   */
   (function(){
     var ttkh = document.createElement("style");
     ttkh.type = "text/css";
