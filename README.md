@@ -59,10 +59,8 @@ except for those indicated:
                  breaks chaining. The object returned is a clientRect with properties
                  left, right, top, bottom, width, and height.
   * classes() - returns a function object for CSS class modifications. This function
-                interrupts chaining, returning an object with functions: add(name),
-                remove(name) and toggle(name). These functions resume chaining. There
-                is also a function contains(name), which returns true or false. This
-                function obviously breaks chaining.
+                interrupts chaining, returning an object with functions add(name),
+                and remove(name). These functions resume chaining.
   * show(yesorno) - true = show element on page, false = hide element.
   * toggle() - flip between show() states
   * html() - get innerHTML
@@ -96,7 +94,6 @@ functions chain, unless otherwise indicated:
   * remove() - remove all elements from their parents. This function, obviously, does not chain.
   * listen(eventName, function) - make all elements listeners for the specified event
   * listenOnce(eventName, function) - idem ditto, but only once.
-  * classes() - passthrough, use as .classes().add(name), .classes().remove(name), and
-                .classes().toggle(name).
+  * classes() - passthrough, use as .classes().add(name) and .classes().remove(name).
   * foreach(function) - call function once for each element, passing the element as parameter. 
 

@@ -60,6 +60,41 @@
     return replaced;
   }
 
+  /*
+   * class list container, for modifying html element class attributes
+   */
+  var ClassList = function(owner) {
+    this.element = owner;
+    var classAttr = this.element.getAttribute("class");
+    this.classes = (!classAttr ? [] : classAttr.split(/\s+/)); };
+
+  /**
+   * ClassList prototype: add(classname) and remove(classname)
+   */
+  ClassList.prototype = {
+    element: {},
+    classes: [],
+    __update: function() {
+      this.element.setAttribute("class", this.classes.join(" "));
+    },
+    add: function(clstring) {
+      if(this.classes.indexOf(clstring)===-1) {
+        this.classes.push(clstring); }
+      this.__update();
+      return this.element;
+    },
+    remove: function(clstring) {
+      var pos = this.classes.indexOf(clstring);
+      if(pos>-1) {
+        this.classes.splice(pos, 1);
+        this.__update(); }
+      return this.element;
+    }
+  };
+
+  // make sure the constructor points to the right thing
+  ClassList.prototype.contstructor = ClassList;
+
   /**
    * extend HTML elements with a few useful (chainable) functions
    */
@@ -108,13 +143,8 @@
      * HTML element class manipulation
      */
     bind(e, "classes", function() {
-      return {
-        add: function(cls) { e.classList.add(cls); return e; },
-        remove: function(cls) { e.classList.remove(cls); return e; },
-        toggle: function(state) { e.classList.toggle(state); return e; },
-        // breaks chaining
-        contains: function(cls) { return e.classList.contains(cls); }
-      };
+      if(!e.__clobj) { e.__clobj = new ClassList(e); }
+      return e.__clobj;
     });
 
     /**
@@ -293,11 +323,6 @@
           remove: function(str) {
             for(var i=0, last=elements.length; i<last; i++) {
               elements[i].classes().remove(str); }
-            return elements; },
-          // set.classes().toggle(...)
-          toggle: function(str) {
-            for(var i=0, last=elements.length; i<last; i++) {
-              elements[i].classes().toggle(str); }
             return elements; }};
       }
       return elements.__classes; };
