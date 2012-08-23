@@ -17,7 +17,28 @@
 
 **/
 (function(window, document, body){
-  
+
+  // don't overload
+  if(window["Toolkit"]) return;
+
+  /**
+   * Toolkit object, for accessing the update() function
+   */
+  var Toolkit = {
+    // runs when we create or template instantiate
+    update: function(element) { return element; },
+    // allows plugins to hook into the update process
+    addUpdate: function(f) {
+      var oldFn = this.update;
+      this.update = function(element) {
+        return f(oldFn(element));
+      };
+    }
+  };
+
+  // bind Toolkit object
+  window["Toolkit"] = Toolkit;
+
   /**
    * set up a special CSS rule for hiding elements. Rather than change the
    * element's CSS properties, we simply tack this class onto any element
@@ -117,14 +138,14 @@
      * template loading
      */
     bind(e, "template", function(name,macros) {
-      return e.html(template(name,macros));
+      return Toolkit.update(e.html(template(name,macros)));
     });
 
     /**
      * get/set css properties
      */
     bind(e, "css", function(prop, val) {
-      if(typeof prop === "object") {
+      if(!val) {
         for(p in prop) {
           if(Object.hasOwnProperty(prop,p)) continue;
           e.css(p,prop[p]); }
@@ -190,7 +211,17 @@
       }
       return e;
     });
- 
+
+    /**
+     * replace a child element, with logical old/new ordering
+     */
+    bind(e, "replace", function(o,n) {
+      if(exists(o.parentNode)) {
+        o.parentNode.replaceChild(n,o);
+      }
+      return n;
+    });
+    
     /**
      * remove self from parent, or child element (either by number or reference)
      */
@@ -258,6 +289,11 @@
       e.addEventListener(s, f, b|false);
       return e;
     });
+    
+    /**
+     * homogenise with set API
+     */
+   e.foreach = function(f) { f(e); }
 
     // chaining return
     return e;
@@ -337,7 +373,7 @@
   var find = function(context, selector) {
     var nodeset = context.querySelectorAll(selector),
         elements = [];
-    if(nodeset.length==0) return;
+    if(nodeset.length==0) return {foreach:function(){}};
     // single?
     if(nodeset.length==1) { return extend(nodeset[0]); }
     // multiple results
@@ -359,7 +395,9 @@
   /**
    * universal document.createElement()
    */
-  window["create"] = function(e) { return extend(document.createElement(e)); };
+  window["create"] = function(e) {
+    var c = extend(document.createElement(e));
+    return Toolkit.update(c); };
 
   /**
    * univeral element selector
@@ -369,6 +407,8 @@
   /**
    * turn a template into a DOM fragment
    */
-  window["template"] = function(name, macros) { return extend(create("div").template(name, macros).children[0]); }
+  window["template"] = function(name, macros) {
+    return Toolkit.update(extend(create("div").template(name, macros).children[0]));
+  }
 
 }(window,document,document.body));

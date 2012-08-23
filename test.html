@@ -13,12 +13,6 @@
     <p>Okay, three. Unit tests will follow eventually.</p>
     
     <h2>slider test</h2>
-    <script>
-       var slider = create("input");
-       document.listenOnce("DOMContentLoaded",function() {
-         document.body.appendChild(slider);
-         slider.set("type","range");
-       });
-    </script>
+    <input type="range" min="0" max="100" step="1" value="75">
   <body>
 <html>
