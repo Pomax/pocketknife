@@ -32,7 +32,7 @@
             ncmax = parseFloat(rails.get("max")),
             ratio = x/(max-min),
             value = ""+(ncmin + ratio*(ncmax-ncmin));
-        slider.css("left", x + "px");
+        slider.css("left", parseInt(100*(value-ncmin)/(ncmax-ncmin)) + "%");
         rails.set("value",value);
         if(rails.onchange) {
           rails.onchange({value: value});
