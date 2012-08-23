@@ -107,7 +107,7 @@ the extension for input type="range" handles things. The main
 trick is to hook into the Toolkit.update() function - the rest
 is up to you.
 
-Speaking of that extensions:
+Speaking of that extension:
 
 ### tiny-toolkit-input-type-range
 
