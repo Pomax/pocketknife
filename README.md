@@ -98,3 +98,32 @@ functions chain, unless otherwise indicated:
   * classes() - passthrough, use as .classes().add(name) and .classes().remove(name).
   * foreach(function) - call function once for each element, passing the element as parameter. 
 
+
+Extensions
+----------
+
+You can write exensions for the toolkit, have a look at how
+the extension for input type="range" handles things. The main
+trick is to hook into the Toolkit.update() function - the rest
+is up to you.
+
+Speaking of that extensions:
+
+### tiny-toolkit-input-type-range
+
+The input type="range" extension adds HTML5 sliders to browsers
+that don't support them, but do support the toolkit. They get
+replaced by a a "div" as rail, with all the input attribtues,
+and a "span" slide head element.
+
+The only JavaScript event offered is onchange, in the div
+(automatically copied from the input element if it was defined).
+
+The extension effects a full replacement sweep on DOMContentLoaded,
+and shims Toolkit so that create("input") will lead to a replacement
+when input.set("type","range") is called. It also extends the
+Toolkit.update() function so that any stray <input type="range">
+elements are converted when update is called.
+
+Particularly IE9 seems to need an extra Toolkit.update() when
+injecting input type="range" elements with this extension in place.
