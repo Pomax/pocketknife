@@ -18,15 +18,16 @@
   // input type="range" --> custom slider replacement
   var substitute = function(input) {
     var rails = create("div");
+    var disabled = false;
     if(input.id) rails.id = input.id;
     if(input.get("class")) rails.set("class",input.get("class"));
     if(input.get("style")) rails.set("style",input.get("style"));
     var props = {
       type: "range",
-      min: input.min || "0",
-      max: input.max || "100",
-      step: input.step || "1",
-      value: input.value || "0"
+      min: input.get("min") || "0",
+      max: input.get("max") || "100",
+      step: input.get("step") || "1",
+      value: input.get("value") || "0"
     };
     rails.set(props);
     rails.classes().add("tiny-toolkit-input-type-range");
@@ -34,6 +35,7 @@
     var slider = create("span").classes().add("tiny-toolkit-input-type-range-slider");
     var sdown = false;
     var reposition = function(rails, slider, evt) {
+      if(disabled) return; 
       var x = evt.clientX,
           min = rails.position().left,
           max = rails.position().right-slider.position().width;
@@ -73,6 +75,10 @@
           mx = parseFloat(props.max),
           v = parseFloat(props.value);
       slider.css("left", (100*(v-mn)/(mx-mn)) + "%"); }
+
+    // enable/disable is always useful
+    rails.disable = function() { disabled = true; rails.classes().add("hidden"); slider.classes().add("hidden"); }
+    rails.enable = function() { disabled = false; rails.classes().remove("hidden"); slider.classes().remove("hidden"); }
     return rails;
   }
 
