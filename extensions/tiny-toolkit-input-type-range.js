@@ -50,19 +50,20 @@
         }
       };
     };
-    if(input.onchange) { rails.onchange = input.onchange; }
+    if(input.onchange) {
+      rails.onchange = input.onchange;
+    }
     rails.add(slider);
-
-    // reposition is actually handled by the rails
-    rails.listen("mousemove", function(evt){ if(sdown) { reposition(rails, slider, evt); }});
-    rails.listen("click", function(evt){ reposition(rails, slider, evt); });
 
     // prevent text-selection UX
     slider.onselectstart = function () { return false; }
     slider.onmousedown = function () { return false; }
+    rails.onselectstart = function () { return false; }
+    rails.onmousedown = function () { return false; }
 
-    // "should reposition" flag
-    slider.listen("mousedown", function(evt){ sdown = true; });
+    // reposition is actually handled by the rails
+    rails.listen("mousemove", function(evt){ if(sdown) { reposition(rails, slider, evt); }});
+    rails.listen("mousedown", function(evt){ sdown = true; reposition(rails, slider, evt); return false; });
     window.document.listen("mouseup", function(evt){ sdown = false; });
 
     // make sure the slider starts at the right position
