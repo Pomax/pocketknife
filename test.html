@@ -4,10 +4,21 @@
     <meta charset="utf-8">
     <title>Tiny-Toolkit.js test page</title>
     <script src="tiny-toolkit.js"></script>
+    <script src="extensions/tiny-toolkit-input-type-range.js"></script>
+    <link rel="stylesheet" href="extensions/tiny-toolkit-input-type-range.css">
   </head>
   <body>
     <p>Fire up the console, try it.</p>
     <p>Two paragraphs, just for testing.</p>
     <p>Okay, three. Unit tests will follow eventually.</p>
+    
+    <h2>slider test</h2>
+    <script>
+       var slider = create("input");
+       document.listenOnce("DOMContentLoaded",function() {
+         document.body.appendChild(slider);
+         slider.set("type","range");
+       });
+    </script>
   <body>
 <html>
