@@ -1,4 +1,15 @@
-// modifies create() to intercept <input type="range">
+/**
+  A Tiny Toolkit extension that makes all browsers do the
+  same thing for <input type="range"> elements. It replaces
+  them with a <div> rail and <span> slide head. The attribute
+  API is the same as for <input type="range">, but the only
+  JavaScript event offered is onchange. It'll do a full
+  document replacement on DOMContentLoaded, and shims toolkit
+  so that create("input") will lead to a replacement when
+  .set("type","range") is called -- it also extends the
+  Toolkit.update() function so that any stray <input type="range">
+  elements are converted when update is called.
+**/
 (function(window) {
 
   // is toolkit loaded?
