@@ -32,13 +32,14 @@
             ncmax = parseFloat(rails.get("max")),
             ratio = x/(max-min),
             value = ""+(ncmin + ratio*(ncmax-ncmin));
-        slider.css("left", parseInt(100*(value-ncmin)/(ncmax-ncmin)) + "%");
+        slider.css("left", parseInt(1000*(value-ncmin)/(ncmax-ncmin))/10 + "%");
         rails.set("value",value);
         if(rails.onchange) {
           rails.onchange({value: value});
         }
       };
     };
+    if(input.onchange) { rails.onchange = input.onchange; }
     rails.add(slider);
 
     // reposition is actually handled by the rails

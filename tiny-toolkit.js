@@ -110,6 +110,9 @@
         this.classes.splice(pos, 1);
         this.__update(); }
       return this.element;
+    },
+    contains: function(clstring) {
+      return (this.classes.indexOf(clstring) !== -1);
     }
   };
 

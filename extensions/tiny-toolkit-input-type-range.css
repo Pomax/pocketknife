@@ -1,22 +1,16 @@
 .tiny-toolkit-input-type-range {
-  width: 8em;
+  width: 100%;
   height: 1em;
   line-height: 1em;
   vertical-align: middle;
   padding-left: 0.3em;
   padding-right: 0.3em;
-  /*
-    Single black pixel, color information is on RGB = 0x16, 0x17, 0x18 (marked with [...] here).
-    Binary layout:
-      47 49 46 38 39 61 01 00 | 32 00 91 00 00 00 00 00
-      FF FF FF[00 00 00]FF FF | FF 21 F9 04 01 00 00 03
-      00 2C 00 00 00 00 01 00 | 32 00 00 02 07 9C 8F A9
-      27 EB 3F 0A 00 3B
-  */
-  background-image: url("data:image/gif;base64,R0lGODlhAQAyAJEAAAAAAP///wAAAP///yH5BAEAAAMALAAAAAABADIAAAIHnI+pJ+s/CgA7");
+  background-image: url("data:image/gif;base64,R0lGODlhAQABAJEAAAAAAAAAAP4BAgAAACH5BAQUAP8ALAAAAAABAAEAAAICRAEAOw==");
   background-position: 0 50%;
+  background-repeat: repeat-x;
   background-color: #EEE;
   border-radius: 0.2em;
+  box-sizing: border-box;
 }
 
 .tiny-toolkit-input-type-range-slider {
