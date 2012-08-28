@@ -107,7 +107,9 @@ Templates are loaded using the two template function:
 
   * var tpl = template("name", {name: value, name2: value2: ...});
 
-this global function returns a template into an extend()ed html element.
+this global function returns a template loaded as HTML element. Note that is you use
+this function, your template needs to be wrapped by a top-level element. If there
+isn't a single root, but several loose fragments, only the first will load.
 
   * element.template("name", {name: value, name2: value2: ...});
 
