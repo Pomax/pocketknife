@@ -103,12 +103,20 @@ functions chain, unless otherwise indicated:
 
 Tiny toolkit can also load template files, as long as they're called [something].tpl.html,
 which can be any HTML fragment, as long as it doesn't have script elements (for now).
-Templates are loaded using the template function:
+Templates are loaded using the two template function:
+
+  * var tpl = template("name", {name: value, name2: value2: ...});
+
+this global function returns a template into an extend()ed html element.
 
   * element.template("name", {name: value, name2: value2: ...});
 
-This will load "name.tpl.html", with instances of {{name}} replaced with value,
-{{name2} with value2, etc. Conditional blocks use the "Mustache" #/ syntax:
+this function effectively performs element.clear().add(template("name", {...})),
+loading a template as the element's innerHTML for immediate use.
+
+For both functions, "name" will try to load the file "name.tpl.html", with
+instances of {{name}} replaced with value, {{name2} with value2, etc.
+Conditional blocks use the "Mustache" #/ syntax:
 
   * {{#name}}this will show up{{/name}} but {{#nopenope}} This won't{{/nopenope}}.
 
