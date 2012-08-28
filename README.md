@@ -6,7 +6,8 @@ While it might look like a jQuery-a-like, it doesn't do transitions
 or animation or plugins, etc, so if you're already using jQuery
 on a site: you have no real reason to use this toolkit.
 
-That said, it is pretty damn small compared to jQuery, and does 
+That said, it is pretty damn small compared to jQuery (or even
+something intended to be smaller than jQuery, like Zepto) and does 
 most of the practical work it does... So, use your best judgement?
 
 Note that I make no pretenses at backward compatibility.
@@ -120,7 +121,7 @@ For both functions, "name" will try to load the file "name.tpl.html", with
 instances of {{name}} replaced with value, {{name2} with value2, etc.
 Conditional blocks use the "Mustache" #/ syntax:
 
-  * {{#name}}this will show up{{/name}} but {{#nopenope}} This won't{{/nopenope}}.
+  * {{#name}} This will show up {{/name}} but {{#nopenope}} This won't {{/nopenope}}.
 
 
 Extensions

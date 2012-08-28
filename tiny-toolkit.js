@@ -337,7 +337,6 @@
     // passthrough functions
     var passThroughList = ["css", "show", "toggle", "set", "listen", "listenOnce"],
         last = passThroughList.length, i, term;
-        
 
     // set up all passthroughs
     for(i=0; i<last; i++) {
