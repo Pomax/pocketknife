@@ -129,6 +129,9 @@
     // shortcut: don't extend if element is nothing
     if(!exists(e)) return;
 
+    // shortcut 2: don't extend if extended
+    if(exists(e.__extended__)) return e;
+
     /**
      * contextual finding
      */
@@ -307,6 +310,7 @@
    e.foreach = function(f) { f(e); }
 
     // chaining return
+    e.__extended__ = true;
     return e;
   };
 
@@ -318,14 +322,22 @@
     return elements;
   };
 
+  // used in extendSet and find
+  var emptySet = [],
+      noop = function() { return emptySet; };
+  emptySet["classes"] = { add: noop, remove: noop };
+  emptySet["remove"] = noop;
+  emptySet["foreach"] = noop;
+
+
   /**
    * API-extend this array for functions that make sense
    */
   var extendSet = function(elements) {
     // passthrough functions
     var passThroughList = ["css", "show", "toggle", "set", "listen", "listenOnce"],
-        last = passThroughList.length, i, term,
-        emptySet = [], noop = function() { return emptySet; };
+        last = passThroughList.length, i, term;
+        
 
     // set up all passthroughs
     for(i=0; i<last; i++) {
@@ -360,7 +372,7 @@
   var find = function(context, selector) {
     var nodeset = context.querySelectorAll(selector),
         elements = [];
-    if(nodeset.length==0) return {foreach:function(){}};
+    if(nodeset.length==0) return emptySet;
     // single?
     if(nodeset.length==1) { return extend(nodeset[0]); }
     // multiple results
