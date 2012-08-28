@@ -147,13 +147,21 @@
      * get/set css properties
      */
     bind(e, "css", function(prop, val) {
-      if(!val) {
+      if(val && val!=="") { e.style[prop] = val; return e; }
+      if(val==="") {
+        var s = e.get("style");
+        if(s) {
+          s = s.replace(new RegExp(prop+"\\s*:\\s*"+val,''),'');
+          e.set("style",s); 
+        }
+        return e; 
+      }
+      if(!val && typeof prop === "object") {
         for(p in prop) {
           if(Object.hasOwnProperty(prop,p)) continue;
           e.css(p,prop[p]); }
         return e;
       }
-      if(exists(val)) { e.style[prop] = val; return e; }
       return document.defaultView.getComputedStyle(e,null).getPropertyValue(prop) || e.style[prop];
     });
 
@@ -261,13 +269,14 @@
      * set object property values
      */
     bind(e, "set", function(a,b) {
-      if(!b) {
+      if(!exists(b)) {
         for(prop in a) {
           if(!Object.hasOwnProperty(a,prop)) {
             e.setAttribute(prop,a[prop]);
           }
         }
-      } else { e.setAttribute(a,b); }
+      }
+      else { e.setAttribute(a,b); }
       return e;
     });
 
@@ -302,9 +311,9 @@
   };
 
   // shorthand passthrough function
-  var passThrough = function(elements, functor, arguments) {
+  var passThrough = function(elements, ns, functor, arguments) {
     for(var i=0, last=elements.length; i<last; i++) {
-      extend(elements[i])[functor].call(null, arguments);
+      extend(exists(ns) ? elements[i][ns]() : elements[i])[functor].apply(elements[i], arguments);
     }
     return elements;
   };
@@ -314,15 +323,26 @@
    */
   var extendSet = function(elements) {
     // passthrough functions
-    var passThroughList = ["css", "show", "toggle", "listen", "listenOnce", "classes.add", "classes.remove"],
+    var passThroughList = ["css", "show", "toggle", "set", "listen", "listenOnce"],
         last = passThroughList.length, i, term,
         emptySet = [], noop = function() { return emptySet; };
 
     // set up all passthroughs
     for(i=0; i<last; i++) {
       term = passThroughList[i];
-      elements[term] = function() { return passThrough(elements, term, arguments); };
+      elements[term] = (function(functor) {
+        return function() {
+          return passThrough(elements, null, functor, arguments);
+        };
+      }(term));
       emptySet[term] = noop; }
+
+    // passthrough with explicit namespace for classes
+    var classobj = {
+      add: function() { return passThrough(elements, "classes", "add", arguments); },
+      remove: function() { return passThrough(elements, "classes", "remove", arguments); }
+    };
+    elements["classes"] = function() { return classobj; };
 
     // passthrough, but return empty list
     elements["remove"] = function() { passThrough(elements, "remove", arguments); return emptySet; };
