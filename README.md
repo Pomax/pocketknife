@@ -99,6 +99,20 @@ functions chain, unless otherwise indicated:
   * foreach(function) - call function once for each element, passing the element as parameter. 
 
 
+### templates
+
+Tiny toolkit can also load template files, as long as they're called [something].tpl.html,
+which can be any HTML fragment, as long as it doesn't have script elements (for now).
+Templates are loaded using the template function:
+
+  element.template("name", {name: value, name2: value2: ...});
+
+This will load "name.tpl.html", with instances of {{name}} replaced with value,
+{{name2} with value2, etc. Conditional blocks use the "Mustache" #/ syntax:
+
+  {{#name}}this will show up{{/name}} but {{#nopenope}} This won't{{/nopenope}}.
+
+
 Extensions
 ----------
 

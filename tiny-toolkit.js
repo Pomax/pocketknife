@@ -7,7 +7,7 @@
 
   That said, it is pretty damn small compared to jQuery... So,
   use your best judgement?
-  
+
   Note that I make no pretenses at backward compatibility.
   This library is only for browsers that natively support canvas,
   which rules out all the ancient browsers. I Look forward to
@@ -49,7 +49,7 @@
     ttkh.type = "text/css";
     ttkh.innerHTML = ".tiny-toolkit-hidden{display:none!important;visibility:hidden!important;opacity:0!important;}";
     document.head.appendChild(ttkh); }());
-  
+
   /**
    * synchronous ajax
    */
@@ -70,10 +70,23 @@
   /**
    * Insanely simple templating - replace {{moo}} with replacements.moo,
    * then use this template as the content for <element>.
+   * Conditionals are supported mustache-style, so {{#name}}when exists{{/name}}
    */
   var template = function(templateName, replacements) {
     if (!templates[templateName]) { templates[templateName] = get(templateName+".tpl.html"); }
     var replaced = templates[templateName], replacement;
+    // preprocess: conditional blocks
+    var props = [], i, last=0, prop,
+        RE = new RegExp("{{#([^}]+)}}((\n|.)*?){{\\/\\1}}",'g'), match;
+    while(match = RE.exec(replaced)) { props.push(match[1]); last++; }
+    for(i=0; i<last; i++) {
+      prop = props[i];
+      RE = new RegExp("{{#"+prop+"}}((\n|.)*?){{\\/"+prop+"}}",'g');
+      // known property: unwrap for substitution
+      if(exists(replacements[prop])) { replaced = replaced.replace(RE, "$1"); }
+      // unknown property: remove entire block
+      else { replaced = replaced.replace(RE, ''); }}
+    // then perform real substitutions
     for(prop in replacements) {
       if(Object.hasOwnProperty(replacements, prop)) continue;
       replacement = replacements[prop];
@@ -85,39 +98,28 @@
    * class list container, for modifying html element class attributes
    */
   var ClassList = function(owner) {
-    this.element = owner;
-    var classAttr = this.element.getAttribute("class");
-    this.classes = (!classAttr ? [] : classAttr.split(/\s+/)); };
-
-  /**
-   * ClassList prototype: add(classname) and remove(classname)
-   */
-  ClassList.prototype = {
-    element: {},
-    classes: [],
-    __update: function() {
-      this.element.setAttribute("class", this.classes.join(" "));
-    },
-    add: function(clstring) {
-      if(this.classes.indexOf(clstring)===-1) {
-        this.classes.push(clstring); }
-      this.__update();
-      return this.element;
-    },
-    remove: function(clstring) {
-      var pos = this.classes.indexOf(clstring);
-      if(pos>-1) {
-        this.classes.splice(pos, 1);
-        this.__update(); }
-      return this.element;
-    },
-    contains: function(clstring) {
-      return (this.classes.indexOf(clstring) !== -1);
-    }
+    var classAttr = owner.getAttribute("class");
+    var classes = (!classAttr ? [] : classAttr.split(/\s+/));
+    var __update = function() {
+      owner.setAttribute("class", classes.join(" "));
+    };
+    this.add = function(clstring) {
+      if(classes.indexOf(clstring)===-1) { classes.push(clstring); }
+      __update();
+      return owner;
+    };
+    this.remove = function(clstring) {
+      var pos = classes.indexOf(clstring);
+      if(pos>-1) { classes.splice(pos, 1); __update(); }
+      return owner;
+    };
+    this.contains = function(clstring) {
+      return (classes.indexOf(clstring) !== -1);
+    };
   };
 
-  // make sure the constructor points to the right thing
-  ClassList.prototype.contstructor = ClassList;
+  // shorthand "try to bind" function
+  var bind = function(e, name, func) { if(!exists(e[name])) { e[name] = func; }};
 
   /**
    * extend HTML elements with a few useful (chainable) functions
@@ -127,16 +129,13 @@
     // shortcut: don't extend if element is nothing
     if(!exists(e)) return;
 
-    // shorthand "try to bind" function
-    var bind = function(e, name, func) { if(!exists(e[name])) { e[name] = func; }};
-    
     /**
      * contextual finding
      */
     bind(e, "find", function(selector) {
       return find(e, selector);
     });
-    
+
     /**
      * template loading
      */
@@ -157,7 +156,7 @@
       if(exists(val)) { e.style[prop] = val; return e; }
       return document.defaultView.getComputedStyle(e,null).getPropertyValue(prop) || e.style[prop];
     });
-    
+
     /**
      * common dimensions
      */
@@ -175,7 +174,7 @@
      * show/hide - note that this uses "block" by default.
      */
     bind(e, "show", function(yes, type) {
-      if(yes) { e.classes().remove("tiny-toolkit-hidden"); } 
+      if(yes) { e.classes().remove("tiny-toolkit-hidden"); }
       else { e.classes().add("tiny-toolkit-hidden"); }
       return e;
     });
@@ -202,7 +201,7 @@
     bind(e, "parent", function() {
       return extend(e.parentNode);
     });
-    
+
     /**
      * add a child element
      */
@@ -224,7 +223,7 @@
       }
       return n;
     });
-    
+
     /**
      * remove self from parent, or child element (either by number or reference)
      */
@@ -292,7 +291,7 @@
       e.addEventListener(s, f, b|false);
       return e;
     });
-    
+
     /**
      * homogenise with set API
      */
@@ -302,70 +301,35 @@
     return e;
   };
 
+  // shorthand passthrough function
+  var passThrough = function(elements, functor, arguments) {
+    for(var i=0, last=elements.length; i<last; i++) {
+      extend(elements[i])[functor].call(null, arguments);
+    }
+    return elements;
+  };
 
   /**
    * API-extend this array for functions that make sense
    */
   var extendSet = function(elements) {
+    // passthrough functions
+    var passThroughList = ["css", "show", "toggle", "listen", "listenOnce", "classes.add", "classes.remove"],
+        last = passThroughList.length, i, term,
+        emptySet = [], noop = function() { return emptySet; };
 
-    // css: only setting
-    elements["css"] = function(prop, val) {
-      for(var i=0, last=elements.length; i<last; i++) {
-        elements[i].css(prop,val); }
-      return elements; };
+    // set up all passthroughs
+    for(i=0; i<last; i++) {
+      term = passThroughList[i];
+      elements[term] = function() { return passThrough(elements, term, arguments); };
+      emptySet[term] = noop; }
 
-    // show/toggle work normally
-    elements["show"] = function(show, type) {
-      for(var i=0, last=elements.length; i<last; i++) {
-        elements[i].show(show, type); }
-      return elements; };
+    // passthrough, but return empty list
+    elements["remove"] = function() { passThrough(elements, "remove", arguments); return emptySet; };
 
-    elements["toggle"] = function() {
-      for(var i=0, last=elements.length; i<last; i++) {
-        elements[i].toggle(); }
-      return elements; };
-    
-    // remove each match from the dom -- return empty list
-    elements["remove"] = function() {
-      for(var i=0, last=elements.length; i<last; i++) {
-        elements[i].remove(); }
-      return []; };
+    // different kind of pass-through
+    elements.foreach = function(f) { for(var i=0, last=elements.length; i<last; i++) { f(elements[i]); } return elements; };
 
-    // listening: straight pass
-    elements["listen"] = function() {
-      for(var i=0, last=elements.length; i<last; i++) {
-        elements[i]["listen"].apply(null,arguments); }
-      return elements; };
-
-    // listening: straight pass
-    elements["listenOnce"] = function() {
-      for(var i=0, last=elements.length; i<last; i++) {
-        elements[i]["listenOnce"].apply(null,arguments); }
-      return elements; };
-
-    // and a plain foreach, for good measure
-    elements.foreach = function(f) {
-      for(var i=0, last=elements.length; i<last; i++) {
-        f(elements[i]); }
-      return elements; };
-
-    // classes: add and remove only
-    elements["classes"] = function() {
-      if(!elements.__classes) {
-        elements.__classes = {
-          // set.classes().add(...)
-          add: function(str) {
-            for(var i=0, last=elements.length; i<last; i++) {
-              elements[i].classes().add(str); }
-            return elements; },
-          // set.classes().remove(...)
-          remove: function(str) {
-            for(var i=0, last=elements.length; i<last; i++) {
-              elements[i].classes().remove(str); }
-            return elements; }};
-      }
-      return elements.__classes; };
-    
     // chaining return
     return elements;
   };
@@ -406,7 +370,7 @@
    * univeral element selector
    */
   window["find"] = function(selector) { return find(document,selector); };
-  
+
   /**
    * turn a template into a DOM fragment
    */
