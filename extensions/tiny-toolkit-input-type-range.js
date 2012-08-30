@@ -59,6 +59,7 @@
     rails.classes().add("tiny-toolkit-input-type-range");
 
     var slider = create("span").classes().add("tiny-toolkit-input-type-range-slider");
+    slider.set("title",props.value); 
     rails.add(slider);
 
     // prevent text-selection UX
