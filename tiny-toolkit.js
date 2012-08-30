@@ -45,11 +45,6 @@
   window["Toolkit"] = Toolkit;
 
   /**
-   * universal toolkit extend function
-   */
-  window["extend"] = extend;
-
-  /**
    * universal document.createElement()
    */
   window["create"] = function(e,a,i) {
@@ -349,6 +344,11 @@
     e["__ttk_extended"] = true;
     return e;
   };
+
+  /**
+   * universal toolkit extend function
+   */
+  window["extend"] = extend;
 
   // shorthand passthrough function
   var passThrough = function(elements, ns, functor, arguments) {
