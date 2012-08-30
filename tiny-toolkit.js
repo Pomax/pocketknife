@@ -216,13 +216,13 @@
      * show/hide
      */
     bind(e, "show", function(yes) {
-      if(yes) { e.set("data-tiny-toolkit-hidden",""); }
-      else { e.removeAttribute("data-tiny-toolkit-hidden"); }
+      if(yes) { e.removeAttribute("data-tiny-toolkit-hidden"); }
+      else { e.set("data-tiny-toolkit-hidden",""); }
       return e;
     });
 
     bind(e, "toggle", function() {
-      e.show(!exists(e.get("data-tiny-toolkit-hidden")));
+      e.show(exists(e.get("data-tiny-toolkit-hidden")));
       return e;
     });
 
