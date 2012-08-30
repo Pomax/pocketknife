@@ -221,7 +221,6 @@
      * show/hide
      */
     bind(e, "show", function(yes) {
-      console.log(yes);
       if(yes) { e.set("data-tiny-toolkit-hidden",""); }
       else { e.removeAttribute("data-tiny-toolkit-hidden"); }
       return e;
