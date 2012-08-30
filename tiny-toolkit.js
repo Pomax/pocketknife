@@ -26,7 +26,10 @@
    */
   var Toolkit = {
     // runs when we create or template instantiate
-    update: function(element) { return element; },
+    update: function(element) {
+      return element;
+    },
+
     // allows plugins to hook into the update process
     addUpdate: function(f) {
       var oldFn = this.update;
@@ -36,33 +39,50 @@
     }
   };
 
-  // bind Toolkit object
+  /**
+   * bind Toolkit object
+   */
   window["Toolkit"] = Toolkit;
 
   /**
-   * set up a special CSS rule for hiding elements. Rather than change the
-   * element's CSS properties, we simply tack this class onto any element
-   * that needs to not be shown, or remove it to reveal the element again.
+   * universal toolkit extend function
    */
-  (function(){
-    var ttkh = document.createElement("style");
-    ttkh.type = "text/css";
-    ttkh.innerHTML = ".tiny-toolkit-hidden{display:none!important;visibility:hidden!important;opacity:0!important;}";
-    document.head.appendChild(ttkh); }());
+  window["extend"] = extend;
+
+  /**
+   * universal document.createElement()
+   */
+  window["create"] = function(e,a,i) {
+    var c = extend(document.createElement(e));
+    // element attributes
+    if(a) {
+      for(p in a) {
+        if(Object.hasOwnProperty(a,p)) continue;
+        c.setAttribute(p, a[p]);
+      }
+    }
+    // element innerHTML
+    if(i) { c.innerHTML = i; }
+    return Toolkit.update(c);
+  };
 
   /**
    * synchronous ajax
    */
-  var get = function(url) {
+  var getTPL = function(url) {
     var xhr = new XMLHttpRequest();
     xhr.open("GET",url,false);
     xhr.send(null);
     // strip whitespace between close+open tags
     return xhr.responseText.replace(/>[\s\r\n]+</g,"><");
-  }
+  };
 
   // 'does e exist?' evaluation function
-  var exists = (function(X) { return function(t) { return (t!==X) && (t!==null); }}());
+  var exists = (function(X) {
+    return function(t) {
+      return (t!==X) && (t!==null);
+    }
+  }());
 
   // list of known templates
   var templates = {};
@@ -73,24 +93,34 @@
    * Conditionals are supported mustache-style, so {{#name}}when exists{{/name}}
    */
   var template = function(templateName, replacements) {
-    if (!templates[templateName]) { templates[templateName] = get(templateName+".tpl.html"); }
-    var replaced = templates[templateName], replacement;
-    // preprocess: conditional blocks
-    var props = [], i, last=0, prop,
+    if (!templates[templateName]) {
+      templates[templateName] = getTPL(templateName+".tpl.html");
+    }
+
+    var replaced = templates[templateName], replacement,
+        props = [], i, last=0, prop,
         RE = new RegExp("{{#([^}]+)}}((\n|.)*?){{\\/\\1}}",'g'), match;
-    while(match = RE.exec(replaced)) { props.push(match[1]); last++; }
+
+    // preprocess: conditional blocks
+    while(match = RE.exec(replaced)) {
+      props.push(match[1]); last++;
+    }
+
     for(i=0; i<last; i++) {
       prop = props[i];
       RE = new RegExp("{{#"+prop+"}}((\n|.)*?){{\\/"+prop+"}}",'g');
       // known property: unwrap for substitution
       if(exists(replacements[prop])) { replaced = replaced.replace(RE, "$1"); }
       // unknown property: remove entire block
-      else { replaced = replaced.replace(RE, ''); }}
+      else { replaced = replaced.replace(RE, ''); }
+    }
+
     // then perform real substitutions
     for(prop in replacements) {
       if(Object.hasOwnProperty(replacements, prop)) continue;
       replacement = replacements[prop];
-      replaced = replaced.replace(new RegExp("{{"+prop+"}}",'g'), replacement); }
+      replaced = replaced.replace(new RegExp("{{"+prop+"}}",'g'), replacement);
+    }
     return replaced;
   }
 
@@ -119,7 +149,11 @@
   };
 
   // shorthand "try to bind" function
-  var bind = function(e, name, func) { if(!exists(e[name])) { e[name] = func; }};
+  var bind = function(e, name, func) {
+    if(!exists(e[name])) {
+      e[name] = func;
+    }
+  };
 
   /**
    * extend HTML elements with a few useful (chainable) functions
@@ -130,7 +164,7 @@
     if(!exists(e)) return;
 
     // shortcut 2: don't extend if extended
-    if(exists(e.__extended__)) return e;
+    if(exists(e["__ttk_extended"])) return e;
 
     /**
      * contextual finding
@@ -177,21 +211,24 @@
      * HTML element class manipulation
      */
     bind(e, "classes", function() {
-      if(!e.__clobj) { e.__clobj = new ClassList(e); }
-      return e.__clobj;
+      if(!e.__ttk_clobj) {
+        e.__ttk_clobj = new ClassList(e);
+      }
+      return e.__ttk_clobj;
     });
 
     /**
-     * show/hide - note that this uses "block" by default.
+     * show/hide
      */
-    bind(e, "show", function(yes, type) {
-      if(yes) { e.classes().remove("tiny-toolkit-hidden"); }
-      else { e.classes().add("tiny-toolkit-hidden"); }
+    bind(e, "show", function(yes) {
+      console.log(yes);
+      if(yes) { e.set("data-tiny-toolkit-hidden",""); }
+      else { e.removeAttribute("data-tiny-toolkit-hidden"); }
       return e;
     });
 
     bind(e, "toggle", function() {
-      e.show(e.classes().contains("tiny-toolkit-hidden"));
+      e.show(!exists(e.get("data-tiny-toolkit-hidden")));
       return e;
     });
 
@@ -307,10 +344,10 @@
     /**
      * homogenise with set API
      */
-   e.foreach = function(f) { f(e); }
+    bind(e, "do", function(f) { f(e); return e; });
 
     // chaining return
-    e.__extended__ = true;
+    e["__ttk_extended"] = true;
     return e;
   };
 
@@ -323,12 +360,10 @@
   };
 
   // used in extendSet and find
-  var emptySet = [],
-      noop = function() { return emptySet; };
+  var emptySet = [], noop = function() { return emptySet; };
   emptySet["classes"] = { add: noop, remove: noop };
   emptySet["remove"] = noop;
-  emptySet["foreach"] = noop;
-
+  emptySet["do"] = noop;
 
   /**
    * API-extend this array for functions that make sense
@@ -346,20 +381,35 @@
           return passThrough(elements, null, functor, arguments);
         };
       }(term));
-      emptySet[term] = noop; }
+      emptySet[term] = noop;
+    }
 
     // passthrough with explicit namespace for classes
     var classobj = {
-      add: function() { return passThrough(elements, "classes", "add", arguments); },
-      remove: function() { return passThrough(elements, "classes", "remove", arguments); }
+      add: function() {
+        return passThrough(elements, "classes", "add", arguments);
+      },
+      remove: function() {
+        return passThrough(elements, "classes", "remove", arguments);
+      }
     };
-    elements["classes"] = function() { return classobj; };
+
+    elements["classes"] = function() {
+      return classobj;
+    };
 
     // passthrough, but return empty list
-    elements["remove"] = function() { passThrough(elements, "remove", arguments); return emptySet; };
+    elements["remove"] = function() {
+      passThrough(elements, "remove", arguments); return emptySet;
+    };
 
     // different kind of pass-through
-    elements.foreach = function(f) { for(var i=0, last=elements.length; i<last; i++) { f(elements[i]); } return elements; };
+    elements["do"] = function(f) {
+      for(var i=0, last=elements.length; i<last; i++) {
+        f(elements[i]);
+      }
+      return elements;
+    };
 
     // chaining return
     return elements;
@@ -381,21 +431,18 @@
   };
 
   /**
+   * set up a special CSS rule for hiding elements. Rather than change the
+   * element's CSS properties, we simply tack this attribute onto any element
+   * that needs to not be shown, or remove it to reveal the element again.
+   */
+  (function(){
+    var ttkh = create("style", {type: "text/css"}, "*[data-tiny-toolkit-hidden]{display:none!important;visibility:hidden!important;opacity:0!important;}");
+    document.head.appendChild(ttkh); }());
+
+  /**
    * extend document and body, since they're just as HTML-elementy as everything else
    */
   extend(document).listenOnce("DOMContentLoaded", function() { extend(body); });
-
-  /**
-   * universal toolkit extend function
-   */
-  window["extend"] = extend;
-
-  /**
-   * universal document.createElement()
-   */
-  window["create"] = function(e) {
-    var c = extend(document.createElement(e));
-    return Toolkit.update(c); };
 
   /**
    * univeral element selector

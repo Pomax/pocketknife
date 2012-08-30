@@ -26,7 +26,13 @@ API
 window gets extended with several new functions:
 
   * extend(e) - toolkit-extend an HTML element. It stays an HTML element.
-  * create(tagname) - create an extend()ed HTML element
+  * create(tagname, properties, content) - create an extend()ed HTML element.
+                                           The properties and content are
+                                           optional. Properties must be an
+                                           object a la {prop: value, ...},
+                                           and content will be assigned to the
+                                           element's innerHTML, so has to be
+                                           a string.
   * template(name, substitutions) - create an extend()ed HTML element from
                                    a template file (found as name + ".tpl.html"),
                                    with {{label}} placeholders replaced by
@@ -47,39 +53,41 @@ body is automatically extend()ed on DOMContentLoaded
 extended HTML elements have the following API. All function calls chain,
 except for those indicated:
 
-  * find(selector) - find inside the HTML's DOM fragment
+  * find(selector) - find things inside the element's DOM fragment.
   * template(name, substitutions) - fill this HTML element with a fragment from
                                     a template file (found as name + ".tpl.html"),
                                     with {{label}} placeholders replaced by
                                     what you indicate as substitution string
                                     in the substitutions object.
   * css(propname) - get the computed or declared value (resolved in that order)
-                    for a specific CSS property for the element
-  * css(propname, value) - set a CSS property value for the element
+                    for a specific CSS property for the element. this function
+                    breaks chaining.
+  * css(propname, value) - set a CSS property value for the element.
   * position() - returns the client's bounding rect for the element. This function
                  breaks chaining. The object returned is a clientRect with properties
                  left, right, top, bottom, width, and height.
   * classes() - returns a function object for CSS class modifications. This function
                 interrupts chaining, returning an object with functions add(name),
-                and remove(name). These functions resume chaining. It also contains
+                and remove(name). These functions resume chaining. It also has
                 the function contains(name). This function breaks chaining.
   * show(yesorno) - true = show element on page, false = hide element.
   * toggle() - flip between show() states
-  * html() - get innerHTML
-  * html(htmltext) set innerHTML
-  * parent() - get element's extend()ed parentNode
+  * html() - get innerHTML. This function breaks chaining.
+  * html(htmltext)) - set innerHTML.
+  * parent() - get element's extend()ed parentNode. This function chains for the parent element.
   * add(child) - add one or more children to this element (more arguments = more children. null permitted)
   * remove() - remove this element from its parent. This function, obviously, breaks chaining.
   * remove(child) - remove child from this element
   * remove(int) - remove child number <int> from this element
   * clear() - remove all children for this element (does the same as .html(""), really)
-  * get(attrname) - get attribute value for this element
-  * set(attrname, value) - set an attribute value for this element
+  * get(attrname) - get attribute value for this element. This function breaks chaining.
+  * set(attrname, value) - set an attribute value for this element.
   * listenOnce(eventName, function) - let element listen to a specific event
                                       but unregister as listener after it triggers.
                                       You may add an optional third "useCapture" arg,
                                       but if you don't know what that means, don't.
   * listen(eventName, function) - make element a listener for the specified event.
+  * do(function(e)) - call function with this element as argument.
 
 
 ### set API
@@ -97,7 +105,7 @@ functions chain, unless otherwise indicated:
   * listen(eventName, function) - make all elements listeners for the specified event
   * listenOnce(eventName, function) - idem ditto, but only once.
   * classes() - passthrough, use as .classes().add(name) and .classes().remove(name).
-  * foreach(function) - call function once for each element, passing the element as parameter. 
+  * do(function(e)) - call function once for each element, passing the element as parameter. 
 
 
 ### templates

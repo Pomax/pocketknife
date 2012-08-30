@@ -5,6 +5,7 @@
   vertical-align: middle;
   padding-left: 0.3em;
   padding-right: 0.3em;
+  /* A single black pixel, to effect a "rail" line */
   background-image: url("data:image/gif;base64,R0lGODlhAQABAJEAAAAAAAAAAP4BAgAAACH5BAQUAP8ALAAAAAABAAEAAAICRAEAOw==");
   background-position: 0 50%;
   background-repeat: repeat-x;
@@ -14,7 +15,7 @@
 }
 
 .tiny-toolkit-input-type-range.hidden {
-  /* no default rules */
+  /* no default rule */
 }
 
 .tiny-toolkit-input-type-range-slider {
