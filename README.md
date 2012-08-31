@@ -33,11 +33,6 @@ window gets extended with several new functions:
                                            and content will be assigned to the
                                            element's innerHTML, so has to be
                                            a string.
-  * template(name, substitutions) - create an extend()ed HTML element from
-                                   a template file (found as name + ".tpl.html"),
-                                   with {{label}} placeholders replaced by
-                                   what you indicate as substitution string
-                                   in the substitutions object.
   * find(selector) - returns extend()ed HTML element(s) based on CSS selector
 
 ### document
@@ -54,11 +49,6 @@ extended HTML elements have the following API. All function calls chain,
 except for those indicated:
 
   * find(selector) - find things inside the element's DOM fragment.
-  * template(name, substitutions) - fill this HTML element with a fragment from
-                                    a template file (found as name + ".tpl.html"),
-                                    with {{label}} placeholders replaced by
-                                    what you indicate as substitution string
-                                    in the substitutions object.
   * css(propname) - get the computed or declared value (resolved in that order)
                     for a specific CSS property for the element. this function
                     breaks chaining.
@@ -108,30 +98,6 @@ functions chain, unless otherwise indicated:
   * do(function(e)) - call function once for each element, passing the element as parameter. 
 
 
-### templates
-
-Tiny toolkit can also load template files, as long as they're called [something].tpl.html,
-which can be any HTML fragment, as long as it doesn't have script elements (for now).
-Templates are loaded using the two template function:
-
-  * var tpl = template("name", {name: value, name2: value2: ...});
-
-this global function returns a template loaded as HTML element. Note that if you use
-this function, your template needs to be wrapped by a top-level element. If there
-isn't a single root, but several loose fragments, only the first will load.
-
-  * element.template("name", {name: value, name2: value2: ...});
-
-this function effectively performs element.clear().add(template("name", {...})),
-loading a template as the element's innerHTML for immediate use.
-
-For both functions, "name" will try to load the file "name.tpl.html", with
-instances of {{name}} replaced with value, {{name2} with value2, etc.
-Conditional blocks use the "Mustache" #/ syntax:
-
-  * {{#name}} This will show up {{/name}} but {{#nopenope}} This won't {{/nopenope}}.
-
-
 Extensions
 ----------
 
@@ -160,3 +126,45 @@ elements are converted when update is called.
 
 Particularly IE9 seems to need an extra Toolkit.update() when
 injecting input type="range" elements with this extension in place.
+
+### tiny-toolkit-templating
+
+Tiny toolkit can also load template files, via this extension, as long as they
+have filesnames that conform to [something].tpl.html (containing any HTML fragment
+except script elements, for now).
+
+Templates are loaded using the two template function:
+
+  * var tpl = template("name", {name: value, name2: value2: ...});
+
+this global function returns a template loaded as HTML element. Note that if you use
+this function, your template needs to be wrapped by a top-level element. If there
+isn't a single root, but several loose fragments, only the first will load.
+
+  * element.template("name", {name: value, name2: value2: ...});
+
+this function effectively performs element.clear().add(template("name", {...})),
+loading a template as the element's innerHTML for immediate use.
+
+For both functions, "name" will try to load the file "name.tpl.html", with
+instances of {{name}} replaced with value, {{name2} with value2, etc.
+Conditional blocks use the "Mustache" #/ syntax:
+
+  * {{#name}} This will show up {{/name}} but {{#nopenope}} This won't {{/nopenope}}.
+
+Window API extension:
+
+  * template(name, substitutions) - create an extend()ed HTML element from
+                                   a template file (found as name + ".tpl.html"),
+                                   with {{label}} placeholders replaced by
+                                   what you indicate as substitution string
+                                   in the substitutions object.
+
+Element API extension:
+
+  * template(name, substitutions) - fill this HTML element with a fragment from
+                                    a template file (found as name + ".tpl.html"),
+                                    with {{label}} placeholders replaced by
+                                    what you indicate as substitution string
+                                    in the substitutions object.
+
