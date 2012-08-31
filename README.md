@@ -152,11 +152,11 @@ Conditional blocks use the "Mustache" #/ syntax:
 
   * {{#name}} This will show up {{/name}} but {{#nopenope}} This won't {{/nopenope}}.
 
-Finally, there's a "use this or fallback to ... is doesn't exist" in the form
-of {{name | fallback text}}. If the substitution object has a propety "name" with
+Finally, there's a "use this or fallback to ... if it doesn't exist" in the form
+of {{name | fallback text}}. If the substitution object has a property "name" with
 a value that isn't a boolean "false", this statement is resolved as if it
-were {{name}}. If the property is not defined, or is "false", it will resolve
-as if it were {{fallback text}}.
+were {{name}}. If the property is not defined, or is "false", the statement
+will resolve as if it were {{fallback text}}.
 
 Window API extension:
 
