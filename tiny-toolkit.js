@@ -373,9 +373,12 @@
     $.listenOnce = function(s, f, b) {
       var e = this, _ = function() {
         e.removeEventListener(s, _, b|false);
+        var rem = e.eventListeners[s].indexOf(_);
+        e.eventListeners[s].splice(rem,1);
         f.call();
       };
       this.addEventListener(s, _, b|false);
+      this.recordEventListener(s,_);
       return this;
     };
   }(HTMLElement.prototype, find));
