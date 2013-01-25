@@ -1,3 +1,51 @@
+// IE and Safari don't support .click() on elements. Simulate differently
+function simulatedClick(target, options) {
+
+  var event = target.ownerDocument.createEvent('MouseEvents'),
+      options = options || {};
+
+  //Set your default options to the right of ||
+  var opts = {
+    type: options.type                      || 'click',
+    canBubble:options.canBubble             || true,
+    cancelable:options.cancelable           || true,
+    view:options.view                       || target.ownerDocument.defaultView,
+    detail:options.detail                   || 1,
+    screenX:options.screenX                 || 0, //The coordinates within the entire page
+    screenY:options.screenY                 || 0,
+    clientX:options.clientX                 || 0, //The coordinates within the viewport
+    clientY:options.clientY                 || 0,
+    ctrlKey:options.ctrlKey                 || false,
+    altKey:options.altKey                   || false,
+    shiftKey:options.shiftKey               || false,
+    metaKey:options.metaKey                 || false, //I *think* 'meta' is 'Cmd/Apple' on Mac, and 'Windows key' on Win. Not sure, though!
+    button:options.button                   || 0, //0 = left, 1 = middle, 2 = right
+    relatedTarget:options.relatedTarget     || null,
+  }
+
+  //Pass in the options
+  event.initMouseEvent(
+    opts.type,
+    opts.canBubble,
+    opts.cancelable,
+    opts.view,
+    opts.detail,
+    opts.screenX,
+    opts.screenY,
+    opts.clientX,
+    opts.clientY,
+    opts.ctrlKey,
+    opts.altKey,
+    opts.shiftKey,
+    opts.metaKey,
+    opts.button,
+    opts.relatedTarget
+  );
+
+  //Fire the event
+  target.dispatchEvent(event);
+}
+
 /**
  * global tests
  */
@@ -27,7 +75,7 @@ test( "exists(x) test", function() {
 test( "test create/1", function() {
   var p = create("p");
   ok(p instanceof HTMLElement, "created element is an HTMLElement");
-  ok(p.nodeName === "P", "created element has the correct node name");
+  equal(p.nodeName, "P", "created element has the correct node name");
 });
 
 test( "test create/2 - attributes", function() {
@@ -49,13 +97,13 @@ test( "test create/3", function() {
 test( "find for non-matching selector (result is empty)", function() {
   var cats = find("lolcats");
   ok(cats instanceof Array, "result is an array");
-  ok(cats.length === 0, "result has length 0");
+  equal(cats.length, 0, "result has length 0");
 });
 
 test( "find for single-matching selector", function() {
   var body = find("body");
   ok(body instanceof HTMLElement, "body is an HTMLElement");
-  ok(body.nodeName === "BODY", "body has the correct tag");
+  equal(body.nodeName, "BODY", "body has the correct tag");
 });
 
 test( "find for multiple-matching selector", function() {
@@ -67,15 +115,15 @@ test( "find for multiple-matching selector", function() {
   div.appendChild(document.createElement("p"));
   var results = div.find("p");
   ok(results instanceof Array, "result is an array");
-  ok(results.length === 5, "result has the correct number of matched elements");
+  equal(results.length, 5, "result has the correct number of matched elements");
 });
 
 test( "add", function() {
   var div= create("div");
   var p = create("p");
   div.add(p);
-  ok(div.children.length === 1, "element has one child after inserting <p>");
-  ok(div.children[0] === p, "element is indeed the intended <p>");
+  equal(div.children.length, 1, "element has one child after inserting <p>");
+  equal(div.children[0], p, "element is indeed the intended <p>");
 });
 
 test( "add/n", function() {
@@ -86,38 +134,38 @@ test( "add/n", function() {
   var p4 = create("p");
   var p5 = create("p");
   div.add(p1, p2, p3, p4, p5);
-  ok(div.children.length === 5, "element has fiver children after inserting <p>");
-  ok(div.children[0] === p1, "element is indeed the intended <p>");
+  equal(div.children.length, 5, "element has fiver children after inserting <p>");
+  equal(div.children[0], p1, "element is indeed the intended <p>");
 });
 
 test( "remove/0", function() {
   var div= create("div");
   var p = create("p");
   div.add(p);
-  ok(div.children.length === 1, "element has one child after inserting <p>");
-  ok(div.children[0] === p, "element is indeed the intended <p>");
+  equal(div.children.length, 1, "element has one child after inserting <p>");
+  equal(div.children[0], p, "element is indeed the intended <p>");
   p.remove();
-  ok(div.children.length === 0, "element has no children after p.remove()");
+  equal(div.children.length, 0, "element has no children after p.remove()");
 });
 
 test( "remove/1 - by id", function() {
   var div= create("div");
   var p = create("p");
   div.add(p);
-  ok(div.children.length === 1, "element has one child after inserting <p>");
-  ok(div.children[0] === p, "element is indeed the intended <p>");
+  equal(div.children.length, 1, "element has one child after inserting <p>");
+  equal(div.children[0], p, "element is indeed the intended <p>");
   div.remove(0);
-  ok(div.children.length === 0, "element has no children after div.remove(0)");
+  equal(div.children.length, 0, "element has no children after div.remove(0)");
 });
 
 test( "remove/1 - by child", function() {
   var div= create("div");
   var p = create("p");
   div.add(p);
-  ok(div.children.length === 1, "element has one child after inserting <p>");
-  ok(div.children[0] === p, "element is indeed the intended <p>");
+  equal(div.children.length, 1, "element has one child after inserting <p>");
+  equal(div.children[0], p, "element is indeed the intended <p>");
   div.remove(p);
-  ok(div.children.length === 0, "element has no children after div.remove(p)");
+  equal(div.children.length, 0, "element has no children after div.remove(p)");
 });
 
 test( "replace/1", function() {
@@ -125,11 +173,11 @@ test( "replace/1", function() {
   var p = create("p");
   var b = create("blockquote");
   div.add(p);
-  ok(div.children.length === 1, "element has one child after inserting <p>");
-  ok(div.children[0] === p, "element is indeed the intended <p>");
+  equal(div.children.length, 1, "element has one child after inserting <p>");
+  equal(div.children[0], p, "element is indeed the intended <p>");
   p.replace(b);
-  ok(div.children.length === 1, "element still has one child after p.replace(b)");
-  ok(div.children[0] === b, "element is indeed the intended <blockquote>");
+  equal(div.children.length, 1, "element still has one child after p.replace(b)");
+  equal(div.children[0], b, "element is indeed the intended <blockquote>");
 });
 
 test( "replace/2", function() {
@@ -137,18 +185,18 @@ test( "replace/2", function() {
   var p = create("p");
   var b = create("blockquote");
   div.add(p);
-  ok(div.children.length === 1, "element has one child after inserting <p>");
-  ok(div.children[0] === p, "element is indeed the intended <p>");
+  equal(div.children.length, 1, "element has one child after inserting <p>");
+  equal(div.children[0], p, "element is indeed the intended <p>");
   div.replace(p, b);
-  ok(div.children.length === 1, "element still has one child after div.replace(p,b)");
-  ok(div.children[0] === b, "element is indeed the intended <blockquote>");
+  equal(div.children.length, 1, "element still has one child after div.replace(p,b)");
+  equal(div.children[0], b, "element is indeed the intended <blockquote>");
 });
 
 test( "clear", function() {
   var div= create("div","<p>1</p><p>2</p><p>3</p><p>4</p><p>5</p>");
-  ok(div.children.length === 5, "element has five children");
+  equal(div.children.length, 5, "element has five children");
   div.clear();
-  ok(div.children.length === 0, "element has no children after clear()");
+  equal(div.children.length, 0, "element has no children after clear()");
 });
 
 test( "parent", function() {
@@ -156,39 +204,40 @@ test( "parent", function() {
   var p = create("p");
   div.add(p);
   var parent = p.parent();
-  ok(parent === div, "div.p.parent is indeed div");
+  equal(parent, div, "div.p.parent is indeed div");
   parent = parent.parent();
-  ok(parent === null, "div.parent() is null");
+  equal(parent, null, "div.parent() is null");
 });
 
 test( "forEach on HTMLelements", function() {
   var p = create("p");
   var f = p.forEach(function(e) { e.innerHTML = "lol"; });
-  ok(f === p, "forEach chains correctly");
-  ok(p.innerHTML === "lol", "forEach applies function correctly");
+  equal(f, p, "forEach chains correctly");
+  equal(p.innerHTML, "lol", "forEach applies function correctly");
 });
 
 test( "css/1 - get property value", function() {
   var p = create("p");
-  ok(p.css("display") === "", "correct display value (null, prior to DOM insertion)");
+  var c = p.css("display");
+  ok(!exists(c) || c === "" || c === "block", "correct display value (null, prior to DOM insertion)");
   document.body.add(p);
-  ok(p.css("display") === "block", "correct display value (block, after DOM insertion)");
+  equal(p.css("display"), "block", "correct display value (block, after DOM insertion)");
   p.remove();
 });
 
 test( "css/1 - set multiple css property/value pairs", function() {
   var p = create("p");
-  ok(p.css({"backgroundColor":"red", "left":"30px", "position":"relative", "zIndex":"999"}) === p, "css/2 chains correctly");
-  ok(p.css("backgroundColor") === "red", "css/2 applied style (background-color) correctly)");
-  ok(p.css("left") === "30px", "css/2 applied style (left) correctly)");
-  ok(p.css("position") === "relative", "css/2 applied style (position) correctly)");
-  ok(p.css("zIndex") === "999", "css/2 applied style (z-index) correctly)");
+  equal(p.css({"backgroundColor":"red", "left":"30px", "position":"relative", "zIndex":"999"}), p, "css/2 chains correctly");
+  equal(p.css("backgroundColor"), "red", "css/2 applied style (background-color) correctly)");
+  equal(p.css("left"), "30px", "css/2 applied style (left) correctly)");
+  equal(p.css("position"), "relative", "css/2 applied style (position) correctly)");
+  equal(p.css("zIndex"), "999", "css/2 applied style (z-index) correctly)");
 });
 
 test( "css/2 - set single css property/value pair", function() {
   var p = create("p");
-  ok(p.css("backgroundColor", "red") === p, "css/2 chains correctly");
-  ok(p.css("backgroundColor") === "red", "css/2 applied style correctly)");
+  equal(p.css("backgroundColor", "red"), p, "css/2 chains correctly");
+  equal(p.css("backgroundColor"), "red", "css/2 applied style correctly)");
 });
 
 test( "position", function() {
@@ -198,10 +247,10 @@ test( "position", function() {
   parent.add(p);
   var pos = p.position();
   var pos2 = p.parent().position();
-  ok(pos.top === 10, "top offset is 10");
-  ok(pos.left === 20, "left offset is 20");
-  ok(pos.bottom + 30 === pos2.bottom, "bottom offset is 30");
-  ok(pos.right + 40 === pos2.right, "right offset is 40");
+  equal(pos.top, 10, "top offset is 10");
+  equal(pos.left, 20, "left offset is 20");
+  equal(pos.bottom + 30, pos2.bottom, "bottom offset is 30");
+  equal(pos.right + 40, pos2.right, "right offset is 40");
   p.remove();
   parent.remove();
 });
@@ -237,15 +286,15 @@ test( "attribute set", function() {
   var p = create("p");
   p.set("autoplay","true");
   p.set("style", "margin:0");
-  ok(exists(p.getAttribute("autoplay")) && p.getAttribute("autoplay")==="true", "autoplay was set correctly");
-  ok(p.css("margin") === "0px", "style was set correctly");
+  ok(exists(p.getAttribute("autoplay")) && p.getAttribute("autoplay"), "autoplay was set correctly");
+  equal(p.css("margin"), "0px", "style was set correctly");
 });
 
 test( "attribute get", function() {
   var p = create("p");
   p.set("style", "margin:0");
   var g = p.get("style");
-  ok(g === "margin:0", "attribute get found correct string");
+  equal(g, "margin:0", "attribute get found correct string");
 });
 
 test( "child get", function() {
@@ -253,7 +302,7 @@ test( "child get", function() {
   var p = create("p");
   div.add(p);
   var p2 = div.get(0);
-  ok(p === p2, "get child by id succeeded");
+  equal(p, p2, "get child by id succeeded");
 });
 
 test( "show", function() {
@@ -281,7 +330,7 @@ test( "html/0", function() {
   var p = create("p","this is some text");
   document.body.add(p);
   var html = p.html();
-  ok(html === "this is some text", "correct html found");
+  equal(html, "this is some text", "correct html found");
   p.remove();
 });
 
@@ -290,7 +339,7 @@ test( "html/1", function() {
   p.html("this is some text");
   document.body.add(p);
   var html = p.html();
-  ok(html === "this is some text", "correct html found");
+  equal(html, "this is some text", "correct html found");
   p.remove();
 });
 
@@ -299,13 +348,16 @@ test( "listen", function() {
   var fired = 0;
   var fn = function() { fired++; };
   p.listen("click", fn);
+  document.body.add(p);
   ok(exists(p.eventListeners), "p has known eventlisteners");
-  ok(p.eventListeners.events.indexOf("click")===0, "p has a click event listener");
-  ok(p.eventListeners.listeners["click"][0] === fn, "p has the correct click event handler");
-  p.click();
-  ok(fired===1, "click handler fired correctly");
-  p.click();
-  ok(fired===2, "click handler fired correctly on second try");
+  ok(exists(p.eventListeners.events), "p has a known events list");
+  equal(p.eventListeners.events.indexOf("click"), 0, "p has a click event listener");
+  equal(p.eventListeners.listeners["click"][0], fn, "p has the correct click event handler");
+  simulatedClick(p);
+  equal(fired, 1, "click handler fired correctly");
+  simulatedClick(p);
+  equal(fired, 2, "click handler fired correctly on second try");
+  p.remove();
 });
 
 test( "listenOnce", function() {
@@ -313,13 +365,15 @@ test( "listenOnce", function() {
   var fired = 0;
   var fn = function() { fired++; };
   p.listenOnce("click", fn);
+  document.body.add(p);
   ok(exists(p.eventListeners), "p has known eventlisteners");
-  ok(p.eventListeners.events.indexOf("click")===0, "p has a click event listener");
-  p.click();
-  ok(fired===1, "click handler fired correctly");
-  ok(p.eventListeners.listeners["click"].length === 0, "p has no click event handler after firing once");
-  p.click();
-  ok(fired===1, "click handler correctly didn't fire on second try");
+  equal(p.eventListeners.events.indexOf("click"), 0, "p has a click event listener");
+  simulatedClick(p);
+  equal(fired, 1, "click handler fired correctly");
+  equal(p.eventListeners.listeners["click"].length, 0, "p has no click event handler after firing once");
+  simulatedClick(p);
+  equal(fired, 1, "click handler correctly didn't fire on second try");
+  p.remove();
 });
 
 
@@ -331,9 +385,9 @@ test( "add", function() {
   div.add(create("p"),create("p"),create("p"),create("p"),create("p"),create("p"));
   var result = div.find("p");
   result.add(create("p"));
-  ok(result[0].children.length === 1, "added element to first result set element");
+  equal(result[0].children.length, 1, "added element to first result set element");
   for(var i=1; i<6; i++) {
-    ok(result[i].children.length === 0, "did not add element to subsequent result set element");
+    equal(result[i].children.length, 0, "did not add element to subsequent result set element");
   }
 });
 
@@ -342,7 +396,7 @@ test( "remove/0", function() {
   div.add(create("p"),create("p"),create("p"),create("p"),create("p"),create("p"));
   var result = div.find("p");
   result.remove();
-  ok(div.children.length === 0, "removed all elements");
+  equal(div.children.length, 0, "removed all elements");
 });
 
 test( "remove/1 - by id (0)", function() {
@@ -350,9 +404,9 @@ test( "remove/1 - by id (0)", function() {
   div.add(create("p","<i>1</i>"),create("p","<i>2</i>"),create("p","<i>3</i>"),create("p","<i>4</i>"),create("p","<i>1</i>"),create("p","<i>6</i>"));
   var result = div.find("p");
   result.remove(0);
-  ok(div.children.length === 6, "preserved original children");
+  equal(div.children.length, 6, "preserved original children");
   for(var i=0; i<6; i++) {
-    ok(result[i].children.length === 0, "removed all sub-elements");
+    equal(result[i].children.length, 0, "removed all sub-elements");
   }
 });
 
@@ -361,12 +415,12 @@ test( "remove/1 - by id (0)", function() {
   div.add(create("p","<i>1</i>"),create("p","<i>2</i>"),create("p","<i>3</i>"),create("p","<i>4</i>"),create("p","<i>1</i>"),create("p","<i>6</i>"));
   var result = div.find("p");
   result.remove(div.children[2].children[0]);
-  ok(div.children.length === 6, "preserved original children");
+  equal(div.children.length, 6, "preserved original children");
   for(var i=0; i<6; i++) {
     if(i!==2)
-      ok(result[i].children.length === 1, "preserved non-matching children");
+      equal(result[i].children.length, 1, "preserved non-matching children");
     else
-      ok(result[i].children.length === 0, "removed matching child");
+      equal(result[i].children.length, 0, "removed matching child");
   }
 });
 
@@ -376,11 +430,11 @@ test( "replace/1", function() {
   var r = create("img");
   var result = div.find("p");
   result = result.replace(r);
-  ok(result === r, "result of replace was a single element");
-  ok(div.children.length === 6, "div still has six elements");
-  ok(div.get(0) === r, "first child of div is replacement");
+  equal(result, r, "result of replace was a single element");
+  equal(div.children.length, 6, "div still has six elements");
+  equal(div.get(0), r, "first child of div is replacement");
   result = div.find("p");
-  ok(result.length === 5, "there are now only five <p> elements");
+  equal(result.length, 5, "there are now only five <p> elements");
 });
 
 test( "replace/2", function() {
@@ -390,10 +444,10 @@ test( "replace/2", function() {
   var r = create("img");
   var result = div.find("p");
   result = result.replace(s, r);
-  ok(result === r, "result of replace was a single element");
-  ok(div.children.length === 6, "div still has six elements");
+  equal(result, r, "result of replace was a single element");
+  equal(div.children.length, 6, "div still has six elements");
   ok(div.get(0) !== r, "first child of div is not the replacement");
-  ok(div.get(2).get(0) === r, "first child of second <p> is the replacement");
+  equal(div.get(2).get(0), r, "first child of second <p> is the replacement");
 });
 
 test( "clear", function() {
@@ -401,9 +455,9 @@ test( "clear", function() {
   div.add(create("p","<i>1</i>"),create("p","<i>2</i>"),create("p","<i>3</i>"),create("p","<i>4</i>"),create("p","<i>1</i>"),create("p","<i>6</i>"));
   var result = div.find("p");
   result.clear();
-  ok(div.children.length === 6, "div still has six elements");
+  equal(div.children.length, 6, "div still has six elements");
   for(var i=0; i<6; i++) {
-    ok(result[i].children.length === 0, "element "+i+"was cleared");
+    equal(result[i].children.length, 0, "element "+i+"was cleared");
   }
 });
 
@@ -415,7 +469,7 @@ test( "forEach", function() {
   result.forEach(function(e){
     content += e.html();
   });
-  ok(content === "123456", "forEach did what it's supposed to");
+  equal(content, "123456", "forEach did what it's supposed to");
 });
 
 test( "css/2 verified via style", function() {
@@ -424,7 +478,7 @@ test( "css/2 verified via style", function() {
   var result = div.find("p");
   result.css("backgroundColor","red");
   for(var i=0; i<6; i++) {
-    ok(div.get(i).style.backgroundColor === "red", "element "+i+" was styled correctly");
+    equal(div.get(i).style.backgroundColor, "red", "element "+i+" was styled correctly");
   }
 });
 
@@ -434,20 +488,24 @@ test( "css/2 verified via css/1", function() {
   var result = div.find("p");
   result.css("backgroundColor","red");
   for(var i=0; i<6; i++) {
-    ok(div.get(i).css("backgroundColor") === "red", "element "+i+" was styled correctly");
+    equal(div.get(i).css("backgroundColor"), "red", "element "+i+" was styled correctly");
   }
 });
 
 test( "css/1 (css multi-pair object) verified via css/1", function() {
   var div= create("div");
   div.add(create("p"),create("p"),create("p"),create("p"),create("p"),create("p"));
+  document.body.add(div);
   var result = div.find("p");
   result.css({"backgroundColor":"red", "color":"green", "border":"1px solid blue"});
+  var col;
   for(var i=0; i<6; i++) {
-    ok(div.get(i).css("backgroundColor") === "red", "element "+i+" was styled correctly");
-    ok(div.get(i).css("color") === "green", "element "+i+" was styled correctly");
-    ok(div.get(i).css("borderColor") === "blue", "element "+i+" was styled correctly");
+    equal(div.get(i).css("backgroundColor"), "red", "element "+i+" was styled correctly");
+    col = div.get(i).css("color");
+    ok(col === "green" || col === "rgb(0, 128, 0)", "element "+i+" was styled correctly");
+    equal(div.get(i).css("borderColor"), "blue", "element "+i+" was styled correctly");
   }
+  div.remove();
 });
 
 test( "position", function() {
@@ -505,9 +563,9 @@ test( "attribute set", function() {
   result.set("autoplay","true");
   result.set("style", "margin:0");
   result = div.find("*[autoplay=true]");
-  ok(result.length === 6, "found all elements");
+  equal(result.length, 6, "found all elements");
   result = div.find("*[style='margin:0']");
-  ok(result.length === 6, "found all elements");
+  equal(result.length, 6, "found all elements");
 });
 
 test( "attribute set", function() {
@@ -517,9 +575,9 @@ test( "attribute set", function() {
   result.set("autoplay","true");
   result.set("style", "margin:0");
   result = div.find("*[autoplay=true]");
-  ok(result.length === 6, "found all elements");
+  equal(result.length, 6, "found all elements");
   result = div.find("*[style='margin:0']");
-  ok(result.length === 6, "found all elements");
+  equal(result.length, 6, "found all elements");
 });
 
 test( "attribute get", function() {
@@ -529,7 +587,7 @@ test( "attribute get", function() {
   result.set("data-lol","cat");
   result = result.get("data-lol");
   for(var i=0; i<6; i++) {
-    ok(result[i] === "cat", "attribute was found, with correct name");
+    equal(result[i], "cat", "attribute was found, with correct name");
   }
 });
 
@@ -539,12 +597,11 @@ test( "child get", function() {
   div.add(create("p","<i>1</i>"),create("p"),create("p","<i>2</i>"),create("p"),create("p","<i>3</i>"),create("p"));
   var result = div.find("p");
   result = result.get(0);
-  console.log(result);
   for(var i=0; i<6; i++) {
     if(i%2===0)
-      ok(result[i] === div.get(i).get(0), "child found");
+      equal(result[i], div.get(i).get(0), "child found");
     else
-      ok(result[i] === undefined, "there is no child");
+      equal(result[i], undefined, "there is no child");
   }
 });
 
@@ -584,7 +641,7 @@ test( "html/0", function() {
   var result = div.find("p");
   var content = result.html();
   for(var i=0; i<6; i++) {
-    ok(content[i] === ""+(i+1), "element had correct HTML content");
+    equal(content[i], ""+(i+1), "element had correct HTML content");
   }
 });
 
@@ -594,38 +651,42 @@ test( "html/1", function() {
   var result = div.find("p");
   result = result.html("you got it").html();
   for(var i=0; i<6; i++) {
-    ok(result[i] === "you got it", "element had correct HTML content");
+    equal(result[i], "you got it", "element had correct HTML content");
   }
 });
 
 test( "listen", function() {
   var div= create("div");
   div.add(create("p","1"),create("p","2"),create("p","3"),create("p","4"),create("p","5"),create("p","6"));
+  document.body.add(div);
   var result = div.find("p");
   var clicks = 0;
   result.listen("click", function() { clicks++; });
   for(var i=0; i<6; i++) {
-    div.get(i).click();
+    simulatedClick(div.get(i));
   }
-  ok(clicks === 6, "all events fired");
+  equal(clicks, 6, "all events fired");
   for(var i=0; i<6; i++) {
-    div.get(i).click();
+    simulatedClick(div.get(i));
   }
-  ok(clicks === 12, "all events fired again");
+  equal(clicks, 12, "all events fired again");
+  div.remove();
 });
 
 test( "listenOnce", function() {
   var div= create("div");
   div.add(create("p","1"),create("p","2"),create("p","3"),create("p","4"),create("p","5"),create("p","6"));
+  document.body.add(div);
   var result = div.find("p");
   var clicks = 0;
   result.listenOnce("click", function() { clicks++; });
   for(var i=0; i<6; i++) {
-    div.get(i).click();
+    simulatedClick(div.get(i));
   }
-  ok(clicks === 6, "all events fired");
+  equal(clicks, 6, "all events fired");
   for(var i=0; i<6; i++) {
-    div.get(i).click();
+    simulatedClick(div.get(i));
   }
-  ok(clicks === 6, "no events fired again");
+  equal(clicks, 6, "no events fired again");
+  div.remove();
 });

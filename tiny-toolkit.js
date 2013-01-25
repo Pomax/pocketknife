@@ -383,29 +383,29 @@
     };
 
     $.eventListeners = false;
-    $["元のaddEventListener"] = $.addEventListener;
-    $.addEventListener = function() {
-      $["元のaddEventListener"].apply(this, arguments);
+    // decorated [add/remove]EventListener
+    $.addAnEventListener = function(s,f,b) {
+      this.addEventListener(s,f,b);
       if(!this.eventListeners) {
         this.eventListeners = new EventListeners(this);
       }
-      this.eventListeners.record(arguments[0], arguments[1]);
+      this.eventListeners.record(s,f);
     };
-    $["元のremoveEventListener"] = $.removeEventListener;
-    $.removeEventListener = function() {
-      $["元のremoveEventListener"].apply(this, arguments);
-      this.eventListeners.forget(arguments[0], arguments[1]);
+    $.removeAnEventListener = function(s,f,b) {
+      this.removeEventListener(s,f,b);
+      this.eventListeners.forget(s,f);
     };
+    // better functions
     $.listen = function(s, f, b) {
-      this.addEventListener(s, f, b|false);
+      this.addAnEventListener(s, f, b|false);
       return this;
     };
     $.listenOnce = function(s, f, b) {
       var e = this, _ = function() {
-        e.removeEventListener(s, _, b|false);
+        e.removeAnEventListener(s, _, b|false);
         f.call();
       };
-      this.addEventListener(s, _, b|false);
+      this.addAnEventListener(s, _, b|false);
       return this;
     };
   }(HTMLElement.prototype, find));
