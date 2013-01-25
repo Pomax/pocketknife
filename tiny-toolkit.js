@@ -1,43 +1,46 @@
 /**
 
-  This is a quick and dirty toolkit for HTLM element manipulation.
-  While it might look like a jQuery-a-like, it has nothing that
-  makes jQuery so powerful, so if you're already using jQuery
-  on a site: you have no reason to use this toolkit.
+  This is a tiny "I don't need the full jQuery API"
+  toolkit. It has a small API, and acts more as a
+  JS API enrichment than a "library". You don't call
+  functions on $ or Toolkit or something, you just
+  call functions in global scope or on HTML elements
+  and arrays. If that seems bad, don't use this.
 
-  That said, it is pretty damn small compared to jQuery... So,
-  use your best judgement?
-
-  Note that I make no pretenses at backward compatibility.
-  This library is only for browsers that natively support canvas,
-  which rules out all the ancient browsers. I Look forward to
-  the days when we look back at this period and laugh at the legacy.
-
-  - Pomax
+  Current state: requires code consolitation in Array and HTMLElement prototypes
 
 **/
-(function(window, document, body){
-
-  // don't overload
-  if(window["Toolkit"]) return;
+(function(window, document){
 
   /**
    * Toolkit object, for accessing the update() function
    */
   var Toolkit = {
-    // runs on element creation (or manually)
-    update: function(element) {
-      return element;
-    },
-
-    // allows plugins to hook into the update process
-    addUpdate: function(f) {
-      var oldFn = this.update;
-      this.update = function(element) {
-        return f(oldFn(element));
-      };
+    version: [2013, 1, 24, 15, 26],
+    newerThan: function(other) {
+      var v = "version";
+          v1 = this[v],
+          v2 = other[v],
+          len = v1.length;
+      for (var pos = 0; pos < len; pos++) {
+        if (v1[pos] > v2[pos]) {
+          return true;
+        }
+      }
+      return false;
     }
   };
+
+  // First, do a version check. Something might have
+  // tried to load another tiny toolkit library.
+  if(window["Toolkit"] && window["Toolkit"].newerThan(Toolkit)) return;
+
+  // No conflict, or this version is newer: continue initialising.
+  (function(toolkit) {
+    toolkit.append = function(name, fn) {
+      this[name] = fn;
+    };
+  }(Toolkit));
 
   /**
    * bind Toolkit object
@@ -45,350 +48,348 @@
   window["Toolkit"] = Toolkit;
 
   /**
-   * universal document.createElement()
+   * Also set up a "does thing ... exist?" evaluation function
    */
-  window["create"] = function(e,a,i) {
-    var c = window["extend"](document.createElement(e));
-    // element attributes
-    if(a) {
-      for(p in a) {
-        if(Object.hasOwnProperty(a,p)) continue;
-        c.setAttribute(p, a[p]);
-      }
-    }
-    // element innerHTML
-    if(i) { c.innerHTML = i; }
-    return Toolkit.update(c);
-  };
-
-  // 'does e exist?' evaluation function
-  window["exists"] = (function(X) {
-    return function(t) {
-      return (t!==X) && (t!==null);
+  window.exists = (function(undef) {
+    return function(thing) {
+      return (thing !== undef) && (thing !== null);
     }
   }());
 
-  /*
-   * class list container, for modifying html element class attributes
+  /**
+   * Extend window so that there is a "create" function that we
+   * can use instead of the limited document.createElement().
    */
-  var ClassList = function(owner) {
-    var classAttr = owner.getAttribute("class");
-    var classes = (!classAttr ? [] : classAttr.split(/\s+/));
-    var __update = function() {
-      owner.setAttribute("class", classes.join(" "));
-    };
-    this.add = function(clstring) {
-      if(classes.indexOf(clstring)===-1) { classes.push(clstring); }
-      __update();
-      return owner;
-    };
-    this.remove = function(clstring) {
-      var pos = classes.indexOf(clstring);
-      if(pos>-1) { classes.splice(pos, 1); __update(); }
-      return owner;
-    };
-    this.contains = function(clstring) {
-      return (classes.indexOf(clstring) !== -1);
-    };
+  window.create = function(tagname, attributes, content) {
+    var element = document.createElement(tagname);
+    // element attributes
+    if(typeof attributes == "object") {
+      for(property in attributes) {
+        if(Object.hasOwnProperty(attributes,property)) continue;
+        element.setAttribute(property, attributes[property]);
+      }
+    }
+    if (typeof attributes === "string") { content = attributes; }
+    if(content) { element.innerHTML = content; }
+    return element;
   };
 
-  // shorthand "try to bind" function
-  var bind = function(e, name, func) {
-    if(!exists(e[name])) {
-      e[name] = func;
+  /**
+   * First off, we replace querySelector/querySelectorAll with "find".
+   * In part to homogenise the API, in part because NodeList is an
+   * utterly useless thing to work with, compared to arrays.
+   */
+  var find = function(context, selector) {
+    var nodelist = context.querySelectorAll(selector),
+        elements = [];
+    if (nodelist.length == 0) {
+      return [];
+    }
+    if (nodelist.length == 1) {
+      return nodelist[0];
+    }
+    for(var i = 0, last = nodelist.length; i < last; i++) {
+      elements[i] = nodelist[i];
+    }
+    return elements;
+  };
+
+  /**
+   * The global implementation of "find" uses the current document.
+   */
+  window.find = function(selector) { return find(document, selector); };
+
+
+/*************************************************************************
+
+  The API, callable on both HTML elements and arrays:
+
+      find, html, position,
+      css, show, toggle,
+      classes().{add, remove, contains},
+      parent, add, replace, remove, clear,
+      get, set,
+      listen, listenOnce,
+      forEach
+
+
+*************************************************************************/
+
+  /**
+   * Not all browsers support .classList, and even those that do
+   * don't let us decorate them to make them chaining functions,
+   * so: too bad, so sad, and we implement our own class list.
+   */
+  var classesName = "内のclasses";
+
+  var ClassList = function(owner) {
+    this.owner = owner;
+    var classAttr = owner.getAttribute("class");
+    this.classes = (!classAttr ? [] : classAttr.split(/\s+/));
+  };
+
+  ClassList.prototype = {
+    classes: [],
+    update: function() {
+      if(this.classes.length === 0) { this.owner.removeAttribute("class"); }
+      else { this.owner.setAttribute("class", this.classes.join(" ")); }
+    },
+    add: function(clstring) {
+      if(this.classes.indexOf(clstring)===-1) {
+        this.classes.push(clstring);
+      }
+      this.update();
+      return this.owner;
+    },
+    remove: function(clstring) {
+      var pos = this.classes.indexOf(clstring);
+      if(pos>-1) {
+        this.classes.splice(pos, 1);
+        this.update();
+      }
+      return this.owner;
+    },
+    contains: function(clstring) {
+      return (this.classes.indexOf(clstring) !== -1);
     }
   };
 
   /**
-   * extend HTML elements with a few useful (chainable) functions
+   * We need to make sure that from a user perspective,
+   * the difference between "array" and "single element"
+   * is irrelevant. This means homogenizing the Array
+   * and HTMLElement prototypes. Yes, prototype pollution,
+   * because we want to install our library, not "use" it.
    */
-  var extend = function(e) {
-
-    // shortcut: don't extend if element is nothing
-    if(!exists(e)) return;
-
-    // shortcut 2: don't extend if extended
-    if(exists(e["__ttk_extended"])) return e;
-
-    /**
-     * contextual finding
-     */
-    bind(e, "find", function(selector) {
-      return find(e, selector);
+  (function($){
+    // public helper for "add only if not already added"
+    $.pushUnique = function(e) { if(this.indexOf(e) === -1) { this.push(e); }};
+    // public helper for "do any of the elements in this array pass this test"
+    $.test = function(f) {
+      var i, len=this.length;
+      for(i=0; i<len; i++) {
+        if(f(this[i])) return true;
+      }
+      return false;
+    };
+    // cache the original forEach function
+    $["元のforEach"] = $.forEach;
+    // then make forEach() a chaining function
+    $.forEach = function(fn) {
+      this["元のforEach"](fn);
+      return this;
+    }
+    // API implementation
+    $.classes = function() {
+      if(!this[classesName]) {
+        this[classesName] = {};
+        var arr = this;
+        ["add","remove"].forEach(function(fn) {
+          arr[classesName][fn] = function() {
+            var input = arguments, classes;
+            arr.forEach(function(e) {
+              classes = e.classes();
+              classes[fn].apply(classes,input);
+            });
+            return arr;
+          }
+        });
+        this[classesName].contains = function() {
+          var input = arguments, classes;
+          return arr.test(function(e) {
+            classes = e.classes();
+            return classes.contains.apply(classes,input);
+          });
+        };
+      }
+      return this[classesName];
+    };
+    // API functions that can't be easily grouped
+    $.find = function(selector) {
+      var results = [];
+      this.forEach(function(e) {
+        e.find(selector).forEach(function(r) {
+          results.pushUnique(r);
+        });
+      });
+      return results;
+    };
+    $.parent = function() {
+      var parents = [];
+      this.forEach(function(e) {
+        parents.pushUnique(e.parent());
+      });
+      return parents;
+    };
+    $.html = function(selector) {
+      var result = "";
+      this.forEach(function(e) {
+        result += e.html();
+      });
+      return result;
+    };
+    $.css = function() {
+      var result = false;
+          input = arguments;
+      this.forEach(function(e) {
+        result = e.css.apply(e, input);
+      });
+      return (typeof result === "string" ? result : this);
+    };
+    // functions that will end up applying only to the first element
+    ["position", "add", "replace", "get"].forEach(function(fn){
+      $[fn] = function() {
+        var e = this[0];
+        return e[fn].apply(e, arguments);
+      };
     });
+    // functions that get applied to all elements, returning the array
+    ["show", "toggle", "set", "remove", "clear", "listen", "listenOnce"].forEach(function(fn){
+      $[fn] = function() {
+        var input = arguments;
+        this.map(function(e) {
+          e[fn].apply(e, input);
+        });
+        return this;
+      };
+    });
+  }(Array.prototype));
 
-    /**
-     * get/set css properties
-     */
-    bind(e, "css", function(prop, val) {
-      if(val && val!=="") { e.style[prop] = val; return e; }
-      if(val==="") {
-        var s = e.get("style");
-        if(s) {
-          s = s.replace(new RegExp(prop+"\\s*:\\s*"+val,''),'');
-          e.set("style",s); 
+
+  /**
+   * Extend the HTMLElement prototype.
+   */
+  (function($, find){
+    // This lets us call forEach irrespective of whether we're
+    // dealing with an HTML element or an array of HTML elements:
+    $.forEach = function(fn) { fn(this); return this; }
+    $.find = function(selector) { return find(this, selector); };
+    $.css = function(prop, val) {
+      if(typeof val === "string") {
+        this.style[prop] = val;
+        if (this.get("style") === "") {
+          this.set("style", "");
         }
-        return e; 
+        return this;
       }
       if(!val && typeof prop === "object") {
         for(p in prop) {
           if(Object.hasOwnProperty(prop,p)) continue;
-          e.css(p,prop[p]); }
-        return e;
+          this.css(p,prop[p]); }
+        return this;
       }
-      return document.defaultView.getComputedStyle(e,null).getPropertyValue(prop) || e.style[prop];
-    });
-
-    /**
-     * common dimensions
-     */
-    bind(e, "position", function() { return e.getBoundingClientRect(); });
-
-    /**
-     * HTML element class manipulation
-     */
-    bind(e, "classes", function() {
-      if(!e.__ttk_clobj) {
-        e.__ttk_clobj = new ClassList(e);
+      return getComputedStyle(this).getPropertyValue(prop) || this.style[prop];
+    };
+    $.position = function() { return this.getBoundingClientRect(); };
+    $.classes = function() {
+      if(!this[classesName]) {
+        this[classesName] = new ClassList(this);
       }
-      return e.__ttk_clobj;
-    });
-
-    /**
-     * show/hide
-     */
-    bind(e, "show", function(yes) {
-      if(yes) { e.removeAttribute("data-tiny-toolkit-hidden"); }
-      else { e.set("data-tiny-toolkit-hidden",""); }
-      return e;
-    });
-
-    bind(e, "toggle", function() {
-      e.show(exists(e.get("data-tiny-toolkit-hidden")));
-      return e;
-    });
-
-    /**
-     * get/set inner HTML
-     */
-    bind(e, "html", function(html) {
+      return this[classesName];
+    };
+    $.show = function(yes) {
+      if(yes) { this.removeAttribute(hiderule); }
+      else { this.setAttribute(hiderule,""); }
+      return this;
+    };
+    $.toggle = function() {
+      this.show(exists(this.get(hiderule)));
+      return this;
+    };
+    $.html = function(html) {
       if(exists(html)) {
-        e.innerHTML = html;
-        return e;
+        this.innerHTML = html;
+        return this;
       }
-      return e.innerHTML;
-    });
-
-    /**
-     * get (extend()ed) parent
-     */
-    bind(e, "parent", function() {
-      return extend(e.parentNode);
-    });
-
-    /**
-     * add a child element
-     */
-    bind(e, "add", function() {
+      return this.innerHTML;
+    };
+    $.parent = function() {
+      return this.parentNode;
+    };
+    $.add = function() {
       for(var i=0, last=arguments.length; i<last; i++) {
         if(exists(arguments[i])) {
-          e.appendChild(arguments[i]);
+          this.appendChild(arguments[i]);
         }
       }
-      return e;
-    });
-
-    /**
-     * replace a child element, with logical old/new ordering
-     */
-    bind(e, "replace", function(o,n) {
-      if(exists(o.parentNode)) {
+      return this;
+    };
+    $.replace = function(o,n) {
+      if(exists(o.parentNode) && exists(n)) {
         o.parentNode.replaceChild(n,o);
+        return n;
       }
-      return n;
-    });
-
-    /**
-     * remove self from parent, or child element (either by number or reference)
-     */
-    bind(e, "remove", function(a) {
+      this.parentNode.replaceChild(o,this);
+      return o;
+    };
+    $.remove = function(thing) {
       // remove self
-      if(!a) { e.parentNode.removeChild(e); return; }
+      if(!thing) { this.parentNode.removeChild(this); }
       // remove child by number
-      if(parseInt(a)==a) { e.removeChild(e.children[a]); }
+      if(parseInt(thing)==thing) { this.removeChild(this.children[cid]); }
       // remove child by reference
-      else{ e.removeChild(a); }
-      return e;
-    });
-
-    /**
-     * clear all children
-     */
-    bind(e, "clear", function() {
-      while(e.children.length>0) {
-        e.remove(e.get(0));
+      else{ this.removeChild(thing); }
+      return this;
+    };
+    $.clear = function() {
+      while(this.children.length>0) {
+        this.remove(this.get(0));
       }
-      return e;
-    });
-
-    /**
-     * get object property values
-     */
-    bind(e, "get", function(a) {
+      return this;
+    };
+    $.get = function(a) {
       if(a == parseInt(a)) {
-        return extend(e.children[a]);
+        return this.children[a];
       }
-      return e.getAttribute(a);
-    });
-
-    /**
-     * set object property values
-     */
-    bind(e, "set", function(a,b) {
+      return this.getAttribute(a);
+    };
+    $.set = function(a,b) {
       if(!exists(b)) {
         for(prop in a) {
-          if(!Object.hasOwnProperty(a,prop)) {
-            e.setAttribute(prop,a[prop]);
+          if(!Object.hasOwnProperty(a, prop)) {
+            this.setAttribute(prop, a[prop]);
           }
         }
       }
-      else { e.setAttribute(a,b); }
-      return e;
-    });
-
-    /**
-     * One-time event listening
-     * (with automatic cleanup)
-     */
-    bind(e, "listenOnce", function(s, f, b) {
-      var _ = function() {
+      else if (b === "") { this.removeAttribute(a); }
+      else { this.setAttribute(a, b); }
+      return this;
+    };
+    $.eventListeners = false;
+    $.recordEventListener = function(s,f) {
+      if(!this.eventListeners) {
+        this.eventListeners = {};
+      }
+      if(!this.eventListeners[s]) {
+        this.eventListeners[s] = [];
+      }
+      this.eventListeners[s].push(f);
+    };
+    $.listen = function(s, f, b) {
+      this.addEventListener(s, f, b|false);
+      this.recordEventListener(s,f);
+      return this;
+    };
+    $.listenOnce = function(s, f, b) {
+      var e = this, _ = function() {
         e.removeEventListener(s, _, b|false);
-        f.call(arguments);
+        f.call();
       };
-      e.addEventListener(s, _, b|false);
-      return e;
-    });
-
-    /**
-     * Permanent event listening
-     */
-    bind(e, "listen", function(s, f, b) {
-      e.addEventListener(s, f, b|false);
-      return e;
-    });
-
-    /**
-     * homogenise with set API
-     */
-    bind(e, "do", function(f) { f(e); return e; });
-    e.length = 1;
-
-    // chaining return
-    e["__ttk_extended"] = true;
-    return e;
-  };
-
-  /**
-   * universal toolkit extend function
-   */
-  window["extend"] = extend;
-
-  // shorthand passthrough function
-  var passThrough = function(elements, ns, functor, arguments) {
-    for(var i=0, last=elements.length; i<last; i++) {
-      window["extend"](exists(ns) ? elements[i][ns]() : elements[i])[functor].apply(elements[i], arguments);
-    }
-    return elements;
-  };
-
-  // used in extendSet and find
-  var emptySet = [], noop = function() { return emptySet; };
-  emptySet["classes"] = { add: noop, remove: noop };
-  emptySet["remove"] = noop;
-  emptySet["do"] = noop;
-
-  /**
-   * API-extend this array for functions that make sense
-   */
-  var extendSet = function(elements) {
-    // passthrough functions
-    var passThroughList = ["css", "show", "toggle", "set", "listen", "listenOnce"],
-        last = passThroughList.length, i, term;
-
-    // set up all passthroughs
-    for(i=0; i<last; i++) {
-      term = passThroughList[i];
-      elements[term] = (function(functor) {
-        return function() {
-          return passThrough(elements, null, functor, arguments);
-        };
-      }(term));
-      emptySet[term] = noop;
-    }
-
-    // passthrough with explicit namespace for classes
-    var classobj = {
-      add: function() {
-        return passThrough(elements, "classes", "add", arguments);
-      },
-      remove: function() {
-        return passThrough(elements, "classes", "remove", arguments);
-      }
+      this.addEventListener(s, _, b|false);
+      return this;
     };
-
-    elements["classes"] = function() {
-      return classobj;
-    };
-
-    // passthrough, but return empty list
-    elements["remove"] = function() {
-      passThrough(elements, "remove", arguments); return emptySet;
-    };
-
-    // different kind of pass-through
-    elements["do"] = function(f) {
-      for(var i=0, last=elements.length; i<last; i++) {
-        f(elements[i]);
-      }
-      return elements;
-    };
-
-    // chaining return
-    return elements;
-  };
+  }(HTMLElement.prototype, find));
 
   /**
-   * The thing that makes it all happen
+   * In order for show() to be reliable, we don't want to intercept style.display.
+   * Instead, we use a special data attribute that regulates visibility. Handy!
    */
-  var find = function(context, selector) {
-    var nodeset = context.querySelectorAll(selector),
-        elements = [];
-    if(nodeset.length==0) return emptySet;
-    // single?
-    if(nodeset.length==1) { return window["extend"](nodeset[0]); }
-    // multiple results
-    for(var i=0, last=nodeset.length; i<last; i++) {
-      elements[i] = window["extend"](nodeset[i]); }
-    return extendSet(elements);
-  };
+  var hiderule = "data-tiny-toolkit-hidden";
+  (function(dataAttr){
+    var rules = ["display:none!important", "visibility:hidden!important","opacity:0!important"],
+        rule  = "*["+dataAttr+"]{" + rules.join(";") + "}",
+        sheet = create("style", {type: "text/css"}, rule);
+    document.head.add(sheet);
+  }(hiderule));
 
-  /**
-   * set up a special CSS rule for hiding elements. Rather than change the
-   * element's CSS properties, we simply tack this attribute onto any element
-   * that needs to not be shown, or remove it to reveal the element again.
-   */
-  (function(){
-    var ttkh = create("style", {type: "text/css"}, "*[data-tiny-toolkit-hidden]{display:none!important;visibility:hidden!important;opacity:0!important;}");
-    document.head.appendChild(ttkh); }());
-
-  /**
-   * extend document and body, since they're just as HTML-elementy as everything else
-   */
-  window["extend"](document).listenOnce("DOMContentLoaded", function() { window["extend"](body); });
-
-  /**
-   * univeral element selector
-   */
-  window["find"] = function(selector) { return find(document,selector); };
-
-}(window,document,document.body));
+}(window, document));
