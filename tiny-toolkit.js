@@ -10,7 +10,7 @@
   Current state: requires code consolitation in Array and HTMLElement prototypes
 
 **/
-(function(window, document){
+(function(_w, _d){
 
   /**
    * Toolkit object, for accessing the update() function
@@ -33,7 +33,7 @@
 
   // First, do a version check. Something might have
   // tried to load another tiny toolkit library.
-  if(window["Toolkit"] && window["Toolkit"].newerThan(Toolkit)) return;
+  if(_w["Toolkit"] && _w["Toolkit"].newerThan(Toolkit)) return;
 
   // No conflict, or this version is newer: continue initialising.
   (function(toolkit) {
@@ -45,12 +45,12 @@
   /**
    * bind Toolkit object
    */
-  window["Toolkit"] = Toolkit;
+  _w["Toolkit"] = Toolkit;
 
   /**
-   * Also set up a "does thing ... exist?" evaluation function
+   * Also set up a "does thing exist?" evaluation function
    */
-  window.exists = (function(undef) {
+  _w["exists"] = (function(undef) {
     return function(thing) {
       return (thing !== undef) && (thing !== null);
     }
@@ -60,8 +60,8 @@
    * Extend window so that there is a "create" function that we
    * can use instead of the limited document.createElement().
    */
-  window.create = function(tagname, attributes, content) {
-    var element = document.createElement(tagname);
+  _w["create"] = function(tagname, attributes, content) {
+    var element = _d.createElement(tagname);
     // element attributes
     if(typeof attributes == "object") {
       for(property in attributes) {
@@ -97,7 +97,7 @@
   /**
    * The global implementation of "find" uses the current document.
    */
-  window.find = function(selector) { return find(document, selector); };
+  _w.find = function(selector) { return find(_d, selector); };
 
 
 /*************************************************************************
@@ -115,13 +115,41 @@
 
 *************************************************************************/
 
+
+  var hiderule = "data-tiny-toolkit-hidden";
+  var classesName = "内のclasses";
+
+
+/*************************************************************************/
+
+  /**
+   * No browsers offers a simple way to find out which functions will
+   * fire on an element, and for which event. Let's change that.
+   */
+  var EventListeners = function(owner) {
+    this.owner = owner;
+    this.events = [];
+    this.listeners = {};
+  }
+  EventListeners.prototype = {
+    record: function(evt, fn) {
+      this.events.pushUnique(evt);
+      if (!exists(this.listeners[evt])) {
+        this.listeners[evt] = [];
+      }
+      this.listeners[evt].push(fn);
+    },
+    forget: function(evt, fn) {
+      var pos = this.listeners[evt].indexOf(fn);
+      this.listeners[evt].splice(pos, 1);
+    }
+  };
+
   /**
    * Not all browsers support .classList, and even those that do
    * don't let us decorate them to make them chaining functions,
    * so: too bad, so sad, and we implement our own class list.
    */
-  var classesName = "内のclasses";
-
   var ClassList = function(owner) {
     this.owner = owner;
     var classAttr = owner.getAttribute("class");
@@ -204,46 +232,14 @@
       }
       return this[classesName];
     };
-    // API functions that can't be easily grouped
-    $.find = function(selector) {
-      var results = [];
-      this.forEach(function(e) {
-        e.find(selector).forEach(function(r) {
-          results.pushUnique(r);
-        });
-      });
-      return results;
-    };
-    $.parent = function() {
-      var parents = [];
-      this.forEach(function(e) {
-        parents.pushUnique(e.parent());
-      });
-      return parents;
-    };
-    $.html = function(selector) {
-      var result = "";
-      this.forEach(function(e) {
-        result += e.html();
-      });
-      return result;
-    };
-    $.css = function() {
-      var result = false;
-          input = arguments;
-      this.forEach(function(e) {
-        result = e.css.apply(e, input);
-      });
-      return (typeof result === "string" ? result : this);
-    };
-    // functions that will end up applying only to the first element
-    ["position", "add", "replace", "get"].forEach(function(fn){
+    // functions that will end up applying only to the first element:
+    ["add", "replace"].forEach(function(fn){
       $[fn] = function() {
         var e = this[0];
         return e[fn].apply(e, arguments);
       };
     });
-    // functions that get applied to all elements, returning the array
+    // functions that get applied to all elements, returning the array:
     ["show", "toggle", "set", "remove", "clear", "listen", "listenOnce"].forEach(function(fn){
       $[fn] = function() {
         var input = arguments;
@@ -251,6 +247,29 @@
           e[fn].apply(e, input);
         });
         return this;
+      };
+    });
+    // aggregating functions with the same aggregation shape:
+    ["find", "parent"].forEach(function(fn) {
+      $[fn] = function() {
+        var results = [];
+        this.forEach(function(e) {
+          e[fn].apply(e,arguments).forEach(function(r) {
+            results.pushUnique(r);
+          });
+        });
+        return results;
+      };
+    });
+    // functions that get applied to all elements, returning the array-of-results:
+    ["position", "html", "css", "get"].forEach(function(fn) {
+      $[fn] = function() {
+        var result = [];
+            input = arguments;
+        this.forEach(function(e) {
+          result.push(e[fn].apply(e, input));
+        });
+        return result;
       };
     });
   }(Array.prototype));
@@ -262,8 +281,13 @@
   (function($, find){
     // This lets us call forEach irrespective of whether we're
     // dealing with an HTML element or an array of HTML elements:
-    $.forEach = function(fn) { fn(this); return this; }
-    $.find = function(selector) { return find(this, selector); };
+    $.forEach = function(fn) {
+      fn(this);
+      return this;
+    }
+    $.find = function(selector) {
+      return find(this, selector);
+    };
     $.css = function(prop, val) {
       if(typeof val === "string") {
         this.style[prop] = val;
@@ -280,7 +304,9 @@
       }
       return getComputedStyle(this).getPropertyValue(prop) || this.style[prop];
     };
-    $.position = function() { return this.getBoundingClientRect(); };
+    $.position = function() {
+      return this.getBoundingClientRect();
+    };
     $.classes = function() {
       if(!this[classesName]) {
         this[classesName] = new ClassList(this);
@@ -293,11 +319,11 @@
       return this;
     };
     $.toggle = function() {
-      this.show(exists(this.get(hiderule)));
+      this.show(_w.exists(this.get(hiderule)));
       return this;
     };
     $.html = function(html) {
-      if(exists(html)) {
+      if(_w.exists(html)) {
         this.innerHTML = html;
         return this;
       }
@@ -308,27 +334,27 @@
     };
     $.add = function() {
       for(var i=0, last=arguments.length; i<last; i++) {
-        if(exists(arguments[i])) {
+        if(_w.exists(arguments[i])) {
           this.appendChild(arguments[i]);
         }
       }
       return this;
     };
     $.replace = function(o,n) {
-      if(exists(o.parentNode) && exists(n)) {
+      if(_w.exists(o.parentNode) && _w.exists(n)) {
         o.parentNode.replaceChild(n,o);
         return n;
       }
       this.parentNode.replaceChild(o,this);
       return o;
     };
-    $.remove = function(thing) {
+    $.remove = function(c) {
       // remove self
-      if(!thing) { this.parentNode.removeChild(this); }
+      if(!_w.exists(c)) { this.parentNode.removeChild(this); }
       // remove child by number
-      if(parseInt(thing)==thing) { this.removeChild(this.children[cid]); }
+      else if(parseInt(c)==c) { this.removeChild(this.children[c]); }
       // remove child by reference
-      else{ this.removeChild(thing); }
+      else if(c.parentNode && c.parentNode === this) { this.removeChild(c); }
       return this;
     };
     $.clear = function() {
@@ -344,7 +370,7 @@
       return this.getAttribute(a);
     };
     $.set = function(a,b) {
-      if(!exists(b)) {
+      if(!_w.exists(b)) {
         for(prop in a) {
           if(!Object.hasOwnProperty(a, prop)) {
             this.setAttribute(prop, a[prop]);
@@ -355,30 +381,31 @@
       else { this.setAttribute(a, b); }
       return this;
     };
+
     $.eventListeners = false;
-    $.recordEventListener = function(s,f) {
+    $["元のaddEventListener"] = $.addEventListener;
+    $.addEventListener = function() {
+      $["元のaddEventListener"].apply(this, arguments);
       if(!this.eventListeners) {
-        this.eventListeners = {};
+        this.eventListeners = new EventListeners(this);
       }
-      if(!this.eventListeners[s]) {
-        this.eventListeners[s] = [];
-      }
-      this.eventListeners[s].push(f);
+      this.eventListeners.record(arguments[0], arguments[1]);
+    };
+    $["元のremoveEventListener"] = $.removeEventListener;
+    $.removeEventListener = function() {
+      $["元のremoveEventListener"].apply(this, arguments);
+      this.eventListeners.forget(arguments[0], arguments[1]);
     };
     $.listen = function(s, f, b) {
       this.addEventListener(s, f, b|false);
-      this.recordEventListener(s,f);
       return this;
     };
     $.listenOnce = function(s, f, b) {
       var e = this, _ = function() {
         e.removeEventListener(s, _, b|false);
-        var rem = e.eventListeners[s].indexOf(_);
-        e.eventListeners[s].splice(rem,1);
         f.call();
       };
       this.addEventListener(s, _, b|false);
-      this.recordEventListener(s,_);
       return this;
     };
   }(HTMLElement.prototype, find));
@@ -387,12 +414,11 @@
    * In order for show() to be reliable, we don't want to intercept style.display.
    * Instead, we use a special data attribute that regulates visibility. Handy!
    */
-  var hiderule = "data-tiny-toolkit-hidden";
   (function(dataAttr){
     var rules = ["display:none!important", "visibility:hidden!important","opacity:0!important"],
         rule  = "*["+dataAttr+"]{" + rules.join(";") + "}",
-        sheet = create("style", {type: "text/css"}, rule);
-    document.head.add(sheet);
+        sheet = _w.create("style", {type: "text/css"}, rule);
+    _d.head.add(sheet);
   }(hiderule));
 
 }(window, document));

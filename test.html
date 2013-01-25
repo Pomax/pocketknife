@@ -1,30 +1,15 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>Tiny-Toolkit.js test page</title>
-    <script src="tiny-toolkit.js"></script>
-    <!--
-    <script src="extensions/templating/tiny-toolkit-templating.js"></script>
-    <script src="extensions/input type range/tiny-toolkit-input-type-range.js"></script>
-    <link rel="stylesheet" href="extensions/input type range/tiny-toolkit-input-type-range.css">
-    -->
-  </head>
-  <body>
-    <div>
-      <p>Fire up the console, try it.</p>
-    </div>
-    <p>Two paragraphs, just for testing.</p>
-    <p>Okay, three. Unit tests will follow eventually.</p>
-
-    <!--
-    <h2>slider test</h2>
-    <input type="range" min="0" max="100" step="1" value="75" onchange="console.log(this.get('value'))">
-
-    <h3>Further slider test:</h3>
-
-    <p>open console, type <code>find("body").add(create("div").template("template",{name:"lol",class:"monkey",conditional:true}));</code>. Or click
-    <span style="cursor: pointer" onclick="find('body').add(create('div').template('template',{name:'lol',class:'monkey',conditional:true}));">[here]</span> to just make it happen automatically.</p>
-     -->
-  <body>
-<html>
+<head>
+  <meta charset="utf-8">
+  <title>QUnit tests</title>
+  <link rel="stylesheet" href="qunit-1.11.0.css">
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+  <script src="qunit-1.11.0.js"></script>
+  <Script src="tiny-toolkit.js"></script>
+  <script src="tests.js"></script>
+</body>
+</html>
