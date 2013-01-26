@@ -1,48 +1,8 @@
-// IE and Safari don't support .click() on elements. Simulate differently
-function simulatedClick(target, options) {
-
-  var event = target.ownerDocument.createEvent('MouseEvents'),
-      options = options || {};
-
-  //Set your default options to the right of ||
-  var opts = {
-    type: options.type                      || 'click',
-    canBubble:options.canBubble             || true,
-    cancelable:options.cancelable           || true,
-    view:options.view                       || target.ownerDocument.defaultView,
-    detail:options.detail                   || 1,
-    screenX:options.screenX                 || 0, //The coordinates within the entire page
-    screenY:options.screenY                 || 0,
-    clientX:options.clientX                 || 0, //The coordinates within the viewport
-    clientY:options.clientY                 || 0,
-    ctrlKey:options.ctrlKey                 || false,
-    altKey:options.altKey                   || false,
-    shiftKey:options.shiftKey               || false,
-    metaKey:options.metaKey                 || false, //I *think* 'meta' is 'Cmd/Apple' on Mac, and 'Windows key' on Win. Not sure, though!
-    button:options.button                   || 0, //0 = left, 1 = middle, 2 = right
-    relatedTarget:options.relatedTarget     || null,
-  }
-
-  //Pass in the options
-  event.initMouseEvent(
-    opts.type,
-    opts.canBubble,
-    opts.cancelable,
-    opts.view,
-    opts.detail,
-    opts.screenX,
-    opts.screenY,
-    opts.clientX,
-    opts.clientY,
-    opts.ctrlKey,
-    opts.altKey,
-    opts.shiftKey,
-    opts.metaKey,
-    opts.button,
-    opts.relatedTarget
-  );
-
-  //Fire the event
+// IE and Safari don't support .click() on elements. Simulate using faked event.
+function simulatedClick(target) {
+  var view = target.ownerDocument.defaultView;
+  var event = target.ownerDocument.createEvent("MouseEvents");
+  event.initMouseEvent("click",true,true,view,1,0,0,0,0,false,false,false,false,0,null);
   target.dispatchEvent(event);
 }
 
