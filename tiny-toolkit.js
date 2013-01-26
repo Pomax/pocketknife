@@ -357,6 +357,7 @@
       else if(c.parentNode && c.parentNode === this) { this.removeChild(c); }
       return this;
     };
+    // and then we declare.
     $.clear = function() {
       while(this.children.length>0) {
         this.remove(this.get(0));
@@ -420,5 +421,10 @@
         sheet = _w.create("style", {type: "text/css"}, rule);
     _d.head.add(sheet);
   }(hiderule));
+
+  (function(){
+    // This is the worst thing - an IE hack. For some reason, IE's "p" has a .clear property
+    delete(HTMLParagraphElement.prototype.clear);
+  }());
 
 }(window, document));

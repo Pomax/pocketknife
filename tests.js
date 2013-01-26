@@ -79,8 +79,8 @@ test( "test create/1", function() {
 });
 
 test( "test create/2 - attributes", function() {
-  var p = create("p", {"style":"background-color: red"});
-  equal(p.getAttribute("style"), "background-color: red", "element has attribute");
+  var p = create("p", {"style":"background-color: red;"});
+  equal(p.getAttribute("style"), "background-color: red;", "element has attribute");
 });
 
 test( "test create/2 - content", function() {
@@ -89,9 +89,9 @@ test( "test create/2 - content", function() {
 });
 
 test( "test create/3", function() {
-  var p = create("p", {"style":"background-color: red"}, "lol");
+  var p = create("p", {"style":"background-color: red;"}, "lol");
   equal(p.innerHTML, "lol", "element has correct content");
-  equal(p.getAttribute("style"), "background-color: red", "element has attribute");
+  equal(p.getAttribute("style"), "background-color: red;", "element has attribute");
 });
 
 test( "find for non-matching selector (result is empty)", function() {
@@ -259,9 +259,9 @@ test( "classes().add", function() {
   var p = create("p");
   p.classes().add("monkey");
   p.classes().add("giraffe");
-  ok(p.classList.contains("monkey"), "p has class 'monkey'");
-  ok(p.classList.contains("giraffe"), "p has class 'giraffe'");
-  ok(!p.classList.contains("blackbird"), "p does not have class 'blackbird'");
+  ok(p.getAttribute("class").indexOf("monkey")!==-1, "p has class 'monkey'");
+  ok(p.getAttribute("class").indexOf("giraffe")!==-1, "p has class 'giraffe'");
+  ok(p.getAttribute("class").indexOf("blackbird")===-1, "p does not have class 'blackbird'");
 });
 
 test( "classes().remove", function() {
@@ -269,8 +269,8 @@ test( "classes().remove", function() {
   p.classes().add("monkey");
   p.classes().add("giraffe");
   p.classes().remove("monkey");
-  ok(!p.classList.contains("monkey"), "p does not have class 'monkey'");
-  ok(p.classList.contains("giraffe"), "p has class 'giraffe'");
+  ok(p.getAttribute("class").indexOf("monkey")===-1, "p does not have class 'monkey'");
+  ok(p.getAttribute("class").indexOf("giraffe")!==-1, "p has class 'giraffe'");
 });
 
 test( "classes().contains", function() {
@@ -292,9 +292,9 @@ test( "attribute set", function() {
 
 test( "attribute get", function() {
   var p = create("p");
-  p.set("style", "margin:0");
+  p.set("style", "margin: 0px;");
   var g = p.get("style");
-  equal(g, "margin:0", "attribute get found correct string");
+  equal(g, "margin: 0px;", "attribute get found correct string");
 });
 
 test( "child get", function() {
@@ -561,10 +561,10 @@ test( "attribute set", function() {
   div.add(create("p"),create("p"),create("p"),create("p"),create("p"),create("p"));
   var result = div.find("p");
   result.set("autoplay","true");
-  result.set("style", "margin:0");
+  result.set("style", "margin: 0px;");
   result = div.find("*[autoplay=true]");
   equal(result.length, 6, "found all elements");
-  result = div.find("*[style='margin:0']");
+  result = div.find("*[style='margin: 0px;']");
   equal(result.length, 6, "found all elements");
 });
 
@@ -573,10 +573,10 @@ test( "attribute set", function() {
   div.add(create("p"),create("p"),create("p"),create("p"),create("p"),create("p"));
   var result = div.find("p");
   result.set("autoplay","true");
-  result.set("style", "margin:0");
+  result.set("style", "margin: 0px;");
   result = div.find("*[autoplay=true]");
   equal(result.length, 6, "found all elements");
-  result = div.find("*[style='margin:0']");
+  result = div.find("*[style='margin: 0px;']");
   equal(result.length, 6, "found all elements");
 });
 
