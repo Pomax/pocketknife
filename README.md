@@ -1,7 +1,7 @@
 Tiny toolkit is a small (I'm trying to keep it near 10kb,
 it's a little over atm, but at least it minifies to 5kb)
 library that expands the JS API for HTML elements, element
-creation, and element query selecting. Thing of it as a
+creation, and element query selecting. Think of it as a
 pocket knife for DOM stuff, contrasted to jQuery's
 squadron of helicopter gunships.
 
