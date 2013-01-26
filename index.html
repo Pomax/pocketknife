@@ -57,6 +57,18 @@
     me to no end. So this fixed that for me. Hopefully it
     fixes things for you too =)</p>
 
+    <p>Another thing to note is that most of what tiny toolkit does
+    is API improvements. Most of the functionality is already part
+    of the DOM API, but with unintuitive naming and only partial
+    behaviours implemented. For instance, getting an element's
+    attribute X is p.getAttribute("X"), and getting its first
+    child is p.children[0]. That makes sense from a bottom-up
+    programming model, but as a human I like top-down. I just want
+    a .get that gets me the right thing, so now it does: p.get("x")
+    gets the content for attribute "x" and p.get(0) gets the first
+    child from the list of children. Short, obvious. Most of the
+    API improvements tiny toolkit effects are of this nature.
+
     <p>There's a battery of tests for the API, for both HTMLElement
     and Array, and so far all tests pass on Chrome, Firefox,
     Opera, Safari and IE. If you're doing something and you
