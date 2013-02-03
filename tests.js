@@ -1,7 +1,8 @@
 // IE and Safari don't support .click() on elements. Simulate using faked event.
 function simulatedClick(target) {
-  var view = target.ownerDocument.defaultView;
-  var event = target.ownerDocument.createEvent("MouseEvents");
+  var t = (target===document ? document : target.ownerDocument);
+  var view = t.defaultView;
+  var event = t.createEvent("MouseEvents");
   event.initMouseEvent("click",true,true,view,1,0,0,0,0,false,false,false,false,0,null);
   target.dispatchEvent(event);
 }
@@ -32,6 +33,11 @@ test( "exists(x) test", function() {
 /**
  * HTMLElement tests
  */
+test( "HTML Element length property", function() {
+  var p = create("p");
+  ok(p.length === 1, "HTMLElement has length 1");
+});
+
 test( "test create/1", function() {
   var p = create("p");
   ok(p instanceof HTMLElement, "created element is an HTMLElement");
@@ -303,7 +309,40 @@ test( "html/1", function() {
   p.remove();
 });
 
-test( "listen", function() {
+/**
+ * event listening on document and element
+ */
+
+test( "listen + forget (document)", function() {
+  var d = document;
+  var fired = 0;
+  var fn = function() { fired++; };
+  d.listen("click", fn);
+  ok(exists(d.eventListeners), "document has known eventlisteners");
+  ok(exists(d.eventListeners.events), "document has a known events list");
+  equal(d.eventListeners.events.indexOf("click"), 0, "document has a click event listener");
+  equal(d.eventListeners.listeners["click"][0], fn, "document has the correct click event handler");
+
+  simulatedClick(d);
+  equal(fired, 1, "click handler fired correctly");
+  simulatedClick(d);
+  equal(fired, 2, "click handler fired correctly on second try");
+  d.forget("click", fn);
+  simulatedClick(d);
+  equal(fired, 2, "click handler correctly did not fire on third try");
+
+  d.listen("click", function(){});
+  d.listen("click", function(){});
+  d.listen("click", function(){});
+  d.listen("click", function(){});
+  d.listen("click", function(){});
+  equal(d.eventListeners.listeners["click"].length, 5, "document has 5 click handlers");
+
+  d.forget("click");
+  equal(d.eventListeners.listeners["click"].length, 0, "document has no click handlers");
+});
+
+test( "listen + forget (element)", function() {
   var p = create("p");
   var fired = 0;
   var fn = function() { fired++; };
@@ -313,11 +352,24 @@ test( "listen", function() {
   ok(exists(p.eventListeners.events), "p has a known events list");
   equal(p.eventListeners.events.indexOf("click"), 0, "p has a click event listener");
   equal(p.eventListeners.listeners["click"][0], fn, "p has the correct click event handler");
+
   simulatedClick(p);
   equal(fired, 1, "click handler fired correctly");
   simulatedClick(p);
   equal(fired, 2, "click handler fired correctly on second try");
-  p.remove();
+  p.forget("click", fn);
+  simulatedClick(p);
+  equal(fired, 2, "click handler correctly did not fire on third try");
+
+  p.listen("click", function(){});
+  p.listen("click", function(){});
+  p.listen("click", function(){});
+  p.listen("click", function(){});
+  p.listen("click", function(){});
+  equal(p.eventListeners.listeners["click"].length, 5, "p has 5 click handlers");
+
+  p.forget("click");
+  equal(p.eventListeners.listeners["click"].length, 0, "p has no click handlers");
 });
 
 test( "listenOnce", function() {
@@ -335,6 +387,8 @@ test( "listenOnce", function() {
   equal(fired, 1, "click handler correctly didn't fire on second try");
   p.remove();
 });
+
+
 
 
 /**
@@ -513,7 +567,7 @@ test( "classes.contains", function() {
   div.get(2).classes().add("giraffe");
   ok(result.classes().contains("monkey"), "one or more elements have class 'monkey'");
   ok(result.classes().contains("giraffe"), "one or more elements have class 'giraffe'");
-  ok(!result.classes().contains("blackbird"), "one or more elements have class 'blackbird'");
+  ok(!result.classes().contains("blackbird"), "no elements have class 'blackbird'");
 });
 
 test( "attribute set", function() {
@@ -649,4 +703,40 @@ test( "listenOnce", function() {
   }
   equal(clicks, 6, "no events fired again");
   div.remove();
+});
+
+/**
+ * Ajax tests
+ */
+test( "get (synchronous)", function() {
+  var data = get("test.html");
+  ok(exists(data), "there was data");
+  ok(data.indexOf("<title>Tiny Toolkit unit tests</title>") !== -1, "title information was found");
+});
+
+asyncTest( "get (asynchronous callback)", 2, function() {
+  get("test.html", function(xhr) {
+    start();
+    var data = xhr.responseText;
+    ok(exists(data), "there was data");
+    ok(data.indexOf("<title>Tiny Toolkit unit tests</title>") !== -1, "title information was found");
+  });
+});
+
+/**
+ * Array specials
+ */
+test( "pushUnique", function() {
+  var m = [];
+  m.pushUnique("1");
+  m.pushUnique("2");
+  m.pushUnique("3");
+  m.pushUnique("2");
+  m.pushUnique("1");
+  ok(m.length === 3, "correct array lengh");
+});
+
+test( "array .test", function() {
+  equal([1,2,3].test(function(v){ return v%2==0; }), true, "some elements in [1,2,3] conform to v%2==0");
+  equal([1,2,3].test(function(v){ return v%2==0; }, true), false, "not all elements in [1,2,3] conform to v%2==0");
 });

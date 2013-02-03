@@ -28,7 +28,7 @@
         }
       }
       return false;
-    }
+    },
   };
 
   // First, do a version check. Something might have
@@ -55,6 +55,27 @@
       return (thing !== undef) && (thing !== null);
     }
   }());
+
+  /**
+   * And a simplified AJAX API. If called with a callback,
+   * it's async. If not, it's synchronouse, returning the
+   * data obtained through the request.
+   */
+  _w["get"] = function(url, callback) {
+    var xhr = new XMLHttpRequest(),
+        async = exists(callback);
+    xhr.open("GET", url, async);
+    if(async) {
+      xhr.onreadystatechange = function() {
+        var st = xhr.status;
+        if (xhr.readyState === 4 && (st === 200 || st === 0)) {
+          callback(xhr);
+        }
+      };
+    }
+    xhr.send(null);
+    if(!async) { return xhr.responseText; }
+  };
 
   /**
    * Extend window so that there is a "create" function that we
@@ -158,7 +179,7 @@
 
   ClassList.prototype = {
     classes: [],
-    update: function() {
+    __update: function() {
       if(this.classes.length === 0) { this.owner.removeAttribute("class"); }
       else { this.owner.setAttribute("class", this.classes.join(" ")); }
     },
@@ -166,14 +187,14 @@
       if(this.classes.indexOf(clstring)===-1) {
         this.classes.push(clstring);
       }
-      this.update();
+      this.__update();
       return this.owner;
     },
     remove: function(clstring) {
       var pos = this.classes.indexOf(clstring);
       if(pos>-1) {
         this.classes.splice(pos, 1);
-        this.update();
+        this.__update();
       }
       return this.owner;
     },
@@ -193,10 +214,13 @@
     // public helper for "add only if not already added"
     $.pushUnique = function(e) { if(this.indexOf(e) === -1) { this.push(e); }};
     // public helper for "do any of the elements in this array pass this test"
-    $.test = function(f) {
+    $.test = function(f, strict) {
+      if (strict !== true) strict = false;
       var i, len=this.length;
       for(i=0; i<len; i++) {
-        if(f(this[i])) return true;
+        t = f(this[i]);
+        if(strict && !t) return false;
+        if(t && !strict) return true;
       }
       return false;
     };
@@ -240,7 +264,7 @@
       };
     });
     // functions that get applied to all elements, returning the array:
-    ["show", "toggle", "set", "remove", "clear", "listen", "listenOnce"].forEach(function(fn){
+    ["show", "toggle", "set", "remove", "clear", "listen", "forget", "listenOnce"].forEach(function(fn){
       $[fn] = function() {
         var input = arguments;
         this.map(function(e) {
@@ -279,15 +303,14 @@
    * Extend the HTMLElement prototype.
    */
   (function($, find){
+    // Array homogenization
+    $.length = 1;
     // This lets us call forEach irrespective of whether we're
     // dealing with an HTML element or an array of HTML elements:
     $.forEach = function(fn) {
       fn(this);
       return this;
     }
-    $.find = function(selector) {
-      return find(this, selector);
-    };
     $.css = function(prop, val) {
       if(typeof val === "string") {
         this.style[prop] = val;
@@ -329,7 +352,11 @@
       }
       return this.innerHTML;
     };
-    $.parent = function() {
+    $.parent = function(newParent) {
+      if(newParent) {
+        newParent.add(this);
+        return this;
+      }
       return this.parentNode;
     };
     $.add = function() {
@@ -382,34 +409,56 @@
       else { this.setAttribute(a, b); }
       return this;
     };
+  }(HTMLElement.prototype, find));
 
+  /**
+   * Extend the HTMLElement and HTMLDocument prototypes.
+   */
+  [HTMLDocument.prototype, HTMLElement.prototype].forEach(function($) {
+    $.find = function(selector) {
+      return find(this, selector);
+    };
     $.eventListeners = false;
-    // decorated [add/remove]EventListener
-    $.addAnEventListener = function(s,f,b) {
+    $.__addAnEventListener = function(s,f,b) {
       this.addEventListener(s,f,b);
       if(!this.eventListeners) {
         this.eventListeners = new EventListeners(this);
       }
       this.eventListeners.record(s,f);
     };
-    $.removeAnEventListener = function(s,f,b) {
+    $.__removeAnEventListener = function(s,f,b) {
       this.removeEventListener(s,f,b);
       this.eventListeners.forget(s,f);
     };
     // better functions
-    $.listen = function(s, f, b) {
-      this.addAnEventListener(s, f, b|false);
+    $.listen = function(s, f) {
+      this.__addAnEventListener(s, f, false);
       return this;
     };
-    $.listenOnce = function(s, f, b) {
+    $.forget = function(s, f) {
+      if (exists(f)) {
+        this.__removeAnEventListener(s, f, false);
+      }
+      else {
+        var entity = this;
+        var functions = this.eventListeners.listeners[s], i;
+        if (exists(functions)) {
+          for (i = functions.length - 1; i >= 0; i--) {
+            entity.forget(s, functions[i]);
+          };
+        }
+      }
+      return this;
+    };
+    $.listenOnce = function(s, f) {
       var e = this, _ = function() {
-        e.removeAnEventListener(s, _, b|false);
+        e.__removeAnEventListener(s, _, false);
         f.call();
       };
-      this.addAnEventListener(s, _, b|false);
+      this.__addAnEventListener(s, _, false);
       return this;
     };
-  }(HTMLElement.prototype, find));
+  });
 
   /**
    * In order for show() to be reliable, we don't want to intercept style.display.
