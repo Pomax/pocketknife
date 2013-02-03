@@ -362,7 +362,10 @@
     $.add = function() {
       for(var i=0, last=arguments.length; i<last; i++) {
         if(_w.exists(arguments[i])) {
-          this.appendChild(arguments[i]);
+          if(arguments[i] instanceof Array) {
+            var e = this;
+            arguments[i].forEach(function(a) { e.add(a); });
+          } else { this.appendChild(arguments[i]); }
         }
       }
       return this;

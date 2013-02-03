@@ -1,5 +1,5 @@
-The low-down
-============
+Some JavaScript API Extensions
+==============================
 
 Tiny toolkit is a small (I'm trying to keep it near 10kb, it's a little over atm, but at least it minifies to 5kb) library that expands the JS API for HTML elements, element creation, and element query selecting. Think of it as a pocket knife for DOM stuff, contrasted to jQuery's squadron of helicopter gunships.
 
@@ -85,6 +85,19 @@ These can currently be called on any JavaScript array. I will likely modify the 
 * forEach(function) — same as before, except now it returns the array, for chaining.
 
 In addition to this, all the chaining HTML Element API functions are supported. When called, these will run for all elements. For getters, this will return an array of the same size as the element array, with return values in the same place as the original elements: [e1,e2,e3].get("style") when only e2 has a style attribute with display:inline will return ["", "display: inline", ""], for instance.
+
+
+Extensions that use tiny-toolkit
+--------------------------------
+
+For convenience (and of course because I needed them myself) there are two extensions right now. One for loading simple templates, and one for ensuring that type=range inputs work in all browsers, and look the same. You can find these as:
+
+* extensions/input type range
+* extensions/templating
+
+The first extension has no API. It should just work whenever you use type=range inputs (at DOM loaded, or through create). The second has a single function aPI:
+
+* template(templateName, {macro:value, ...}) — returns a DOM element (or array of elements) representing the HTML fragment that is created when a template "templateName.tpl.html" is loaded and all the double-curly-wrapped words have been replaced with values based on the macro substitution property object. Conditionals take the form {{#macro}}...{{/macro}} for now.
 
 Tests
 -----

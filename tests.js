@@ -320,7 +320,7 @@ test( "listen + forget (document)", function() {
   d.listen("click", fn);
   ok(exists(d.eventListeners), "document has known eventlisteners");
   ok(exists(d.eventListeners.events), "document has a known events list");
-  equal(d.eventListeners.events.indexOf("click"), 0, "document has a click event listener");
+  ok(d.eventListeners.events.indexOf("click") !== -1, "document has a click event listener");
   equal(d.eventListeners.listeners["click"][0], fn, "document has the correct click event handler");
 
   simulatedClick(d);
@@ -739,4 +739,25 @@ test( "pushUnique", function() {
 test( "array .test", function() {
   equal([1,2,3].test(function(v){ return v%2==0; }), true, "some elements in [1,2,3] conform to v%2==0");
   equal([1,2,3].test(function(v){ return v%2==0; }, true), false, "not all elements in [1,2,3] conform to v%2==0");
+});
+
+/**
+ * Templating
+ */
+test( "templates", function() {
+  var now = function() { var d = new Date(); return d.getTime() + d.getMilliseconds()/1000; }
+  var start = now();
+  var d = template("test", {title: "template title", showvalue: "show"});
+  var interval = now() - start;
+  ok(d instanceof HTMLElement, "template imported as html element");
+  equal(d.nodeName, "SECTION", "template has correect outer tag");
+  equal(d.children.length, 3, "template has three children.");
+  equal(d.children[0].innerHTML, "template title", "correct title");
+  equal(d.children[2].innerHTML, "This should show up. And the above title is \"template title\".", "correct paragraph text");
+/*
+  start = now();
+  d = template("test", {title: "template title", showvalue: "show"});
+  var end = now() - start;
+  ok(end < interval, "second load (supposedly from cache, "+end+"s) faster than first load (from file, "+interval+"s)");
+*/
 });
