@@ -90,6 +90,6 @@ In addition to this, all the chaining HTML Element API functions are supported. 
 Tests
 -----
 
-There's a battery of tests for the API, using QUnit. So far all tests pass on Chrome, Firefox, Opera, Safari and IE. If you're doing something and you run into a bug, file an issue and I can add a test for it, then fix it (in that order).
+There's a battery of tests for the API (visit http://pomax.github.com/tiny-toolkit/test.html to run them in your browser), using QUnit. So far all tests pass on Chrome, Firefox, Opera, Safari and IE. If you're doing something and you run into a bug, file an issue and I can add a test for it, then fix it (in that order).
 
 - Pomax
