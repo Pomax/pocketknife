@@ -97,7 +97,7 @@ For convenience (and of course because I needed them myself) there are two exten
 
 The first extension has no API. It should just work whenever you use type=range inputs (at DOM loaded, or through create). The second has a single function aPI:
 
-* template(templateName, {macro:value, ...}) — returns a DOM element (or array of elements) representing the HTML fragment that is created when a template "templateName.tpl.html" is loaded and all the double-curly-wrapped words have been replaced with values based on the macro substitution property object. Conditionals take the form {{#macro}}...{{/macro}} for now.
+* **template(templateName, {macro:value, ...})** — returns a DOM element (or array of elements) representing the HTML fragment that is created when a template "templateName.tpl.html" is loaded and all the double-curly-wrapped words have been replaced with values based on the macro substitution property object. Conditionals take the form {{#macro}}...{{/macro}} for now.
 
 Tests
 -----
