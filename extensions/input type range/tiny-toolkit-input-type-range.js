@@ -48,9 +48,6 @@
           step = parseFloat(rails.get("step")),
           ratio = x / (max - min),
           value = ncmin + step*(Math.round(ratio * (ncmax - ncmin) / step));
-
-    console.log(ncmin + ", " + ncmax + ", " + step + ", " + ratio + ", " + value);
-
       if (value > ncmax || value === oldval) return;
       oldval = value;
       slider.css("left", parseInt(1000 * (value - ncmin) / (ncmax-ncmin)) / 10 + "%");
