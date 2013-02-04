@@ -716,10 +716,10 @@ test( "get (synchronous)", function() {
 
 asyncTest( "get (asynchronous callback)", 2, function() {
   get("test.html", function(xhr) {
-    start();
     var data = xhr.responseText;
     ok(exists(data), "there was data");
     ok(data.indexOf("<title>Tiny Toolkit unit tests</title>") !== -1, "title information was found");
+    start();
   });
 });
 

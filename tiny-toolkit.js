@@ -67,8 +67,7 @@
     xhr.open("GET", url, async);
     if(async) {
       xhr.onreadystatechange = function() {
-        var st = xhr.status;
-        if (xhr.readyState === 4 && (st === 200 || st === 0)) {
+        if (xhr.readyState === 4 && xhr.status === 200) {
           callback(xhr);
         }
       };
@@ -414,10 +413,15 @@
     };
   }(HTMLElement.prototype, find));
 
+  // IE has no HTMLDocument, so we have to use Document, instead.
+  var docPrototype;
+  try { docPrototype = HTMLDocument.prototype }
+  catch(e) { docPrototype = Document.prototype; }
+
   /**
    * Extend the HTMLElement and HTMLDocument prototypes.
    */
-  [HTMLDocument.prototype, HTMLElement.prototype].forEach(function($) {
+  [docPrototype, HTMLElement.prototype].forEach(function($) {
     $.find = function(selector) {
       return find(this, selector);
     };
