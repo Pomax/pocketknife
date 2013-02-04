@@ -46,7 +46,7 @@ These can be called on any JavaScript reference to an HTML element on your page.
 * **classes().contains("className")** — check whether this element is assigned a specific class. This function breaks chaining.
 
 * **parent([newParent])** — get this element's parent. If a new parent is given, this element is moved from wherever it is now to a position as last child of this new parent. When a new parent is given, the return value is the element. Without a new parent, the return value is the parent.
-* **add(element, [element2], [element3], ...)** — add one or more children to this element.
+* **add(element, [element2], [element3], ...)** — add one or more children to this element. Any argument can be an HTMLElement, or an array of elements. They'll all get added.
 * **replace(a, [b])** — If one argument is given, the element is replaced with the element "a". If two arguments are given, child element "a" for this element is replaced by (possibly non-child) element "b".
 * **remove([child])** — if no arguments are given, removes this element from its parent. If one argument is given, its type determines what happens. If it's a number, the child in that array position will be removed. If it's another HTML element, that element as child will be removed from this element.
 * **clear()** — remove all children from this element.
