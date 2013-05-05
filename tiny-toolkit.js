@@ -7,40 +7,22 @@
   call functions in global scope or on HTML elements
   and arrays. If that seems bad, don't use this.
 
-  Current state: requires code consolitation in Array and HTMLElement prototypes
-
 **/
-(function(_w, _d){
+(function(_w, _d) {
+
+  /**
+   * Give things a foreach.
+   */
+  NodeList.prototype.forEach =
+  HTMLCollection.prototype.forEach =
+  Array.prototype.forEach;
 
   /**
    * Toolkit object, for accessing the update() function
    */
   var Toolkit = {
-    version: [2013, 1, 24, 15, 26],
-    newerThan: function(other) {
-      var v = "version";
-          v1 = this[v],
-          v2 = other[v],
-          len = v1.length;
-      for (var pos = 0; pos < len; pos++) {
-        if (v1[pos] > v2[pos]) {
-          return true;
-        }
-      }
-      return false;
-    },
-  };
-
-  // First, do a version check. Something might have
-  // tried to load another tiny toolkit library.
-  if(_w["Toolkit"] && _w["Toolkit"].newerThan(Toolkit)) return;
-
-  // No conflict, or this version is newer: continue initialising.
-  (function(toolkit) {
-    toolkit.append = function(name, fn) {
-      this[name] = fn;
-    };
-  }(Toolkit));
+    version: "2013.05.05"
+  }
 
   /**
    * bind Toolkit object
@@ -59,23 +41,30 @@
   /**
    * And a simplified AJAX API. If called with a callback,
    * it's async. If not, it's synchronouse, returning the
-   * data obtained through the request.
+   * data obtained through the request. BASED ON XHR2
    */
-  _w["get"] = function(url, callback) {
-    var xhr = new XMLHttpRequest(),
-        async = exists(callback);
-    xhr.open("GET", url, async);
-    if(async) {
-      xhr.onreadystatechange = function() {
-        var st = xhr.status;
-        if (xhr.readyState === 4 && (st === 200 || st === 0)) {
+  (function setupXHR(){
+    var doXHR = function(method,url,data,callback) {
+      var xhr = new XMLHttpRequest(),
+          async = exists(callback);
+      xhr.open(method, url, async);
+      if(async) {
+        xhr.onload = function() {
           callback(xhr);
-        }
-      };
-    }
-    xhr.send(null);
-    if(!async) { return xhr.responseText; }
-  };
+        };
+      }
+      if(data) {
+        var fd = new FormData();
+        for(name in Object.keys(data)) {
+          fd.append(name,data[name]); }
+        data = fd; }
+      xhr.withCredentials = true;
+      xhr.send(data);
+      if(!async) { return xhr.responseText; }
+    };
+    _w["get"] = function(url, callback) { return doXHR("GET", url, null, callback); };
+    _w["post"] = function(url, data, callback) { return doXHR("POST", url, data, callback); };
+  }(_w));
 
   /**
    * Extend window so that there is a "create" function that we
@@ -133,7 +122,6 @@
       listen, listenOnce,
       forEach
 
-
 *************************************************************************/
 
 
@@ -160,7 +148,7 @@
       }
       this.listeners[evt].push(fn);
     },
-    forget: function(evt, fn) {
+    ignore: function(evt, fn) {
       var pos = this.listeners[evt].indexOf(fn);
       this.listeners[evt].splice(pos, 1);
     }
@@ -171,10 +159,11 @@
    * don't let us decorate them to make them chaining functions,
    * so: too bad, so sad, and we implement our own class list.
    */
-  var ClassList = function(owner) {
+  ClassList = function(owner) {
     this.owner = owner;
     var classAttr = owner.getAttribute("class");
     this.classes = (!classAttr ? [] : classAttr.split(/\s+/));
+    this.length = 0;
   };
 
   ClassList.prototype = {
@@ -182,6 +171,7 @@
     __update: function() {
       if(this.classes.length === 0) { this.owner.removeAttribute("class"); }
       else { this.owner.setAttribute("class", this.classes.join(" ")); }
+      this.length = this.classes.length;
     },
     add: function(clstring) {
       if(this.classes.indexOf(clstring)===-1) {
@@ -200,7 +190,8 @@
     },
     contains: function(clstring) {
       return (this.classes.indexOf(clstring) !== -1);
-    }
+    },
+    item: function(idx) { return this.classes[idx]; }
   };
 
   /**
@@ -264,7 +255,7 @@
       };
     });
     // functions that get applied to all elements, returning the array:
-    ["show", "toggle", "set", "remove", "clear", "listen", "forget", "listenOnce"].forEach(function(fn){
+    ["show", "toggle", "set", "remove", "clear", "listen", "ignore", "listenOnce"].forEach(function(fn){
       $[fn] = function() {
         var input = arguments;
         this.map(function(e) {
@@ -387,7 +378,6 @@
       else if(c.parentNode && c.parentNode === this) { this.removeChild(c); }
       return this;
     };
-    // and then we declare.
     $.clear = function() {
       while(this.children.length>0) {
         this.remove(this.get(0));
@@ -417,7 +407,7 @@
   /**
    * Extend the HTMLElement and HTMLDocument prototypes.
    */
-  [HTMLDocument.prototype, HTMLElement.prototype].forEach(function($) {
+  [Document.prototype, HTMLElement.prototype].forEach(function($) {
     $.find = function(selector) {
       return find(this, selector);
     };
@@ -431,14 +421,14 @@
     };
     $.__removeAnEventListener = function(s,f,b) {
       this.removeEventListener(s,f,b);
-      this.eventListeners.forget(s,f);
+      this.eventListeners.ignore(s,f);
     };
     // better functions
     $.listen = function(s, f) {
       this.__addAnEventListener(s, f, false);
       return this;
     };
-    $.forget = function(s, f) {
+    $.ignore = function(s, f) {
       if (exists(f)) {
         this.__removeAnEventListener(s, f, false);
       }
@@ -447,7 +437,7 @@
         var functions = this.eventListeners.listeners[s], i;
         if (exists(functions)) {
           for (i = functions.length - 1; i >= 0; i--) {
-            entity.forget(s, functions[i]);
+            entity.ignore(s, functions[i]);
           };
         }
       }
@@ -474,9 +464,10 @@
     _d.head.add(sheet);
   }(hiderule));
 
+  // This is the worst thing: an IE hack. For some reason,
+  // IE's "p" has a .clear property, for no good reason.
   (function(){
-    // This is the worst thing - an IE hack. For some reason, IE's "p" has a .clear property
-    delete(HTMLParagraphElement.prototype.clear);
+    delete HTMLParagraphElement.prototype.clear;
   }());
 
 }(window, document));

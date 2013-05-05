@@ -16,7 +16,7 @@
   if(!window["Toolkit"]) return;
 
   // take input element, hijack set() so that (type,range)
-  // triggers a replacement, IF the element is in the DOM.
+  // triggers a replacement, *IF* the element is in the DOM.
   (function($) {
     var original = $.set;
     $.set = function(name, value) {
@@ -139,7 +139,8 @@
     });
   }
 
-  // trigger replacement on DOM ready
+  // trigger replacements now, and on DOM ready
+  replaceAllInputRanges();
   document.listenOnce("DOMContentLoaded", replaceAllInputRanges);
 
 }(window));

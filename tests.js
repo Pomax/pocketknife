@@ -73,12 +73,12 @@ test( "find for single-matching selector", function() {
 });
 
 test( "find for multiple-matching selector", function() {
-  var div = document.createElement("div");
-  div.appendChild(document.createElement("p"));
-  div.appendChild(document.createElement("p"));
-  div.appendChild(document.createElement("p"));
-  div.appendChild(document.createElement("p"));
-  div.appendChild(document.createElement("p"));
+  var div = create("div");
+  div.add(create("p"));
+  div.add(create("p"));
+  div.add(create("p"));
+  div.add(create("p"));
+  div.add(create("p"));
   var results = div.find("p");
   ok(results instanceof Array, "result is an array");
   equal(results.length, 5, "result has the correct number of matched elements");
@@ -313,7 +313,7 @@ test( "html/1", function() {
  * event listening on document and element
  */
 
-test( "listen + forget (document)", function() {
+test( "listen + ignore (document)", function() {
   var d = document;
   var fired = 0;
   var fn = function() { fired++; };
@@ -327,7 +327,7 @@ test( "listen + forget (document)", function() {
   equal(fired, 1, "click handler fired correctly");
   simulatedClick(d);
   equal(fired, 2, "click handler fired correctly on second try");
-  d.forget("click", fn);
+  d.ignore("click", fn);
   simulatedClick(d);
   equal(fired, 2, "click handler correctly did not fire on third try");
 
@@ -338,11 +338,11 @@ test( "listen + forget (document)", function() {
   d.listen("click", function(){});
   equal(d.eventListeners.listeners["click"].length, 5, "document has 5 click handlers");
 
-  d.forget("click");
+  d.ignore("click");
   equal(d.eventListeners.listeners["click"].length, 0, "document has no click handlers");
 });
 
-test( "listen + forget (element)", function() {
+test( "listen + ignore (element)", function() {
   var p = create("p");
   var fired = 0;
   var fn = function() { fired++; };
@@ -357,7 +357,7 @@ test( "listen + forget (element)", function() {
   equal(fired, 1, "click handler fired correctly");
   simulatedClick(p);
   equal(fired, 2, "click handler fired correctly on second try");
-  p.forget("click", fn);
+  p.ignore("click", fn);
   simulatedClick(p);
   equal(fired, 2, "click handler correctly did not fire on third try");
 
@@ -368,7 +368,7 @@ test( "listen + forget (element)", function() {
   p.listen("click", function(){});
   equal(p.eventListeners.listeners["click"].length, 5, "p has 5 click handlers");
 
-  p.forget("click");
+  p.ignore("click");
   equal(p.eventListeners.listeners["click"].length, 0, "p has no click handlers");
 });
 
