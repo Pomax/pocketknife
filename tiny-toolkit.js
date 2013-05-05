@@ -405,7 +405,7 @@
   }(HTMLElement.prototype, find));
 
   // IE has no HTMLDocument, so we have to use Document, instead.
-  var docPrototype = (_w.HTMLDocument? : HTMLDocument.prototype : Document.prototype);
+  var docPrototype = (_w.HTMLDocument? HTMLDocument.prototype : Document.prototype);
 
   /**
    * Extend the HTMLElement and HTMLDocument prototypes.
