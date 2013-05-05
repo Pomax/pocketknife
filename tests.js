@@ -3,7 +3,7 @@ function simulatedClick(target) {
   var t = (target===document ? document : target.ownerDocument);
   var view = t.defaultView;
   var event = t.createEvent("MouseEvents");
-  event.initMouseEvent("click",true,true,view,1,0,0,0,0,false,false,false,false,0,null);
+  event.initMouseEvent("click",true,true,view,1,0,0,0,0,false,false,false,false,1,null);
   target.dispatchEvent(event);
 }
 
@@ -716,10 +716,10 @@ test( "get (synchronous)", function() {
 
 asyncTest( "get (asynchronous callback)", 2, function() {
   get("test.html", function(xhr) {
-    start();
     var data = xhr.responseText;
     ok(exists(data), "there was data");
     ok(data.indexOf("<title>Tiny Toolkit unit tests</title>") !== -1, "title information was found");
+    start();
   });
 });
 
@@ -754,10 +754,24 @@ test( "templates", function() {
   equal(d.children.length, 3, "template has three children.");
   equal(d.children[0].innerHTML, "template title", "correct title");
   equal(d.children[2].innerHTML, "This should show up. And the above title is \"template title\".", "correct paragraph text");
-/*
-  start = now();
-  d = template("test", {title: "template title", showvalue: "show"});
-  var end = now() - start;
-  ok(end < interval, "second load (supposedly from cache, "+end+"s) faster than first load (from file, "+interval+"s)");
-*/
+});
+
+/**
+ * Input type=range
+ */
+test( "input type=range", function() {
+  var d = create("input", {"id":"inputrange", "min": 10, "max": 25, "step": 1});
+  document.body.add(d);
+  d.set("type","range");
+  d = find("#inputrange");
+  equal(d.nodeName, "DIV", "transformed to a div");
+  equal(d.id, "inputrange", "correct id");
+  equal(d.children.length, 1, "transformed to a 1-child div");
+ 
+  var evt = { "clientX": (document.body.clientWidth/2)|0, button: 1, which: 1 };
+  d.eventListeners.listeners["mousedown"].forEach(function(f){ f(evt); });
+  document.eventListeners.listeners["mouseup"].forEach(function(f){ f(evt); });
+  var value = d.get("value");
+  equal(value, 17, "slider was repositioned correctly");
+  document.body.remove(d);
 });

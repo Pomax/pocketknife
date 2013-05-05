@@ -404,10 +404,13 @@
     };
   }(HTMLElement.prototype, find));
 
+  // IE has no HTMLDocument, so we have to use Document, instead.
+  var docPrototype = (_w.HTMLDocument? : HTMLDocument.prototype : Document.prototype);
+
   /**
    * Extend the HTMLElement and HTMLDocument prototypes.
    */
-  [Document.prototype, HTMLElement.prototype].forEach(function($) {
+  [docPrototype, HTMLElement.prototype].forEach(function($) {
     $.find = function(selector) {
       return find(this, selector);
     };
