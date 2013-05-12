@@ -34,9 +34,9 @@
   /**
    * universal slider repositioning
    */
-  function reposition(rails, slider, evt) {
+  function reposition(rails, slider, options) {
     if (rails.get("disabled") === "disabled") return;
-    var x = evt.clientX,
+    var x = options.screenX,
         rpos = rails.position(),
         min = rpos.left,
         max = rpos.right - slider.position().width,
@@ -81,6 +81,20 @@
     slider.set("title", props.value);
     rails.add(slider);
 
+    rails.set = (function(rails){
+      var oldSet = rails.set;
+      return function(a,b) {
+        var ret = oldSet.call(rails,a,b);
+        if(["min","max","value"].indexOf(a)!==-1) {
+          var mn = rails.get("min"),
+              mx = rails.get("max"),
+              v = rails.get("value");
+          slider.css("left", (100 * (v - mn) / (mx - mn)) + "%");
+        }
+        return ret;
+      };
+    }(rails));
+
     // prevent text-selection UX
     slider.onselectstart = function () { return false; };
     slider.onmousedown   = function () { return false; };
@@ -88,25 +102,51 @@
     rails.onmousedown    = function () { return false; };
 
     // reposition is actually handled by the rails
-    rails.listen("mousedown", function(evt){
-      if (evt.which === 1 || evt.button === 1) {
-        rails.set("sdown", true);
-        reposition(rails, slider, evt);
-        return false;
-      }
+    var touchlock = false,
+        engageRails = function(evt){
+          if (evt.which === 1 || evt.button === 1) {
+            rails.set("sdown", true);
+            reposition(rails, slider, {screenX: evt.screenX});
+            return false;
+          }
+        };
+
+    rails.listen("mousedown", function(evt) {
+      if (touchlock) return;
+      return engageRails(evt);
     });
 
-    // but when the mouse is down, response is
-    // handled by the document.
+    rails.listen("touchstart", function(evt) {
+      touchlock = true;
+      evt.which = evt.button = 1;
+      evt.screenX = evt.touches[0].screenX;
+      return engageRails(evt);
+    }),
+
+    // but when the mouse is down, response is handled by the document.
     document.listen("mousemove", function(evt) {
+      if (touchlock) return;
       if (rails.get("sdown") === "true") {
         reposition(rails, slider, evt);
       }
     });
 
+    document.listen("touchmove", function(evt) {
+      if (touchlock && rails.get("sdown") === "true") {
+        evt.screenX = evt.touches[0].screenX;
+        reposition(rails, slider, evt);
+      }
+    })
+
     document.listen("mouseup", function(evt) {
+      if (touchlock) return;
       rails.set("sdown", false);
     });
+
+    document.listen("touchend", function(evt) {
+      rails.set("sdown", false);
+      touchlock = false;
+    })
 
     // make sure the slider starts at the correct position
     // before returning the substitution element.
@@ -120,15 +160,15 @@
     // enable/disable is always useful
     rails.disable = function() {
       rails.set("disabled","disabled");
-      rails.classes().add("hidden");
-      slider.classes().add("hidden");
-    };
-    rails.enable = function() {
-      rails.set("disabled","");
-      rails.classes().remove("hidden");
-      slider.classes().remove("hidden");
+      rails.show(false);
+      slider.show(false);
     };
 
+    rails.enable = function() {
+      rails.set("disabled",false);
+      rails.show(true);
+      slider.show(true);
+    };
     return rails;
   }
 

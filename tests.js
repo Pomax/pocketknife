@@ -767,11 +767,13 @@ test( "input type=range", function() {
   equal(d.nodeName, "DIV", "transformed to a div");
   equal(d.id, "inputrange", "correct id");
   equal(d.children.length, 1, "transformed to a 1-child div");
- 
-  var evt = { "clientX": (document.body.clientWidth/2)|0, button: 1, which: 1 };
+
+  var evt = { "screenX": (document.body.clientWidth/2)|0, button: 1, which: 1 };
   d.eventListeners.listeners["mousedown"].forEach(function(f){ f(evt); });
   document.eventListeners.listeners["mouseup"].forEach(function(f){ f(evt); });
   var value = d.get("value");
   equal(value, 17, "slider was repositioned correctly");
-  document.body.remove(d);
+//  document.body.remove(d);
+  (function(){ document.body.add(create("p","&nbsp;")); }());
 });
+

@@ -398,7 +398,7 @@
           }
         }
       }
-      else if (b === "") { this.removeAttribute(a); }
+      else if (b === false) { this.removeAttribute(a); }
       else { this.setAttribute(a, b); }
       return this;
     };
