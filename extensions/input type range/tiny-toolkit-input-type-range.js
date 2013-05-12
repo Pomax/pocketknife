@@ -136,7 +136,7 @@
     });
 
     document.listen("touchmove", function(evt) {
-      var now = Date.now();
+      var now = (new Date()).getTime();
       if (touchlock && lastTouch===-1 && rails.get("sdown") === "true") {
         evt.screenX = evt.touches.item(0).screenX;
         find('#testlog').clear().add("touchmove: "+evt.screenX+"<br>");
