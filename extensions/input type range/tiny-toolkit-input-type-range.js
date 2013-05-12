@@ -137,11 +137,11 @@
 
     document.listen("touchmove", function(evt) {
       var now = Date.now();
-      if (touchlock && rails.get("sdown") === "true" && lastTouch==-1) {
+      if (touchlock && lastTouch===-1 && rails.get("sdown") === "true") {
+        lastTouch = now;
         evt.screenX = evt.touches[0].screenX;
         find('#testlog').clear().add("touchmove: "+evt.screenX+"<br>");
         reposition(rails, slider, evt);
-        lastTouch = now;
       } else {
         // we don't want to be flooded with touch events
         if(now-lastTouch>200) {
