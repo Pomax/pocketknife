@@ -103,6 +103,7 @@
 
     // reposition is actually handled by the rails
     var touchlock = false,
+        lastTouch = -1;
         engageRails = function(evt){
           if (evt.which === 1 || evt.button === 1) {
             rails.set("sdown", true);
@@ -135,10 +136,17 @@
     });
 
     document.listen("touchmove", function(evt) {
-      if (touchlock && rails.get("sdown") === "true") {
+      var now = Date.now();
+      if (touchlock && rails.get("sdown") === "true" && lastTouch==-1) {
         evt.screenX = evt.touches[0].screenX;
         find('#testlog').clear().add("touchmove: "+evt.screenX+"<br>");
         reposition(rails, slider, evt);
+        lastTouch = now;
+      } else {
+        // we don't want to be flooded with touch events
+        if(now-lastTouch>200) {
+          lastTouch = -1;
+        }
       }
     })
 
@@ -150,8 +158,11 @@
 
     document.listen("touchend", function(evt) {
       find('#testlog').clear().add("touchend<br>");
+      evt.screenX = evt.touches[0].screenX;
+      reposition(rails, slider, evt);
       rails.set("sdown", false);
       touchlock = false;
+      lastTouch = -1;
     })
 
     // make sure the slider starts at the correct position
