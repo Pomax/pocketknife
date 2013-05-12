@@ -110,6 +110,13 @@
   _w.find = function(selector) { return find(_d, selector); };
 
 
+  /**
+   * For DOM manipulation, we really want 'head' and 'body' to just
+   * be global variables.
+   */
+  _w.head = document.head;
+  _w.body = document.body;
+
 /*************************************************************************
 
   The API, callable on both HTML elements and arrays:
@@ -350,19 +357,29 @@
       }
       return this.parentNode;
     };
-    $.add = function() {
-      for(var i=0, last=arguments.length; i<last; i++) {
-        if(_w.exists(arguments[i])) {
-          if(arguments[i] instanceof Array) {
-            var e = this;
-            arguments[i].forEach(function(a) { e.add(a); });
-          } else { this.appendChild(arguments[i]); }
+    $.add = function(arg) {
+      if(typeof arg === "string") {
+        this.innerHTML += arg;
+      }
+      else {
+        for(var i=0, last=arguments.length; i<last; i++) {
+          if(_w.exists(arguments[i])) {
+            if(arguments[i] instanceof Array) {
+              var e = this;
+              arguments[i].forEach(function(a) { e.add(a); });
+            } else { this.appendChild(arguments[i]); }
+          }
         }
       }
       return this;
     };
     $.replace = function(o,n) {
-      if(_w.exists(o.parentNode) && _w.exists(n)) {
+      if(typeof o === "string") {
+        var re = new RegExp(o,'g');
+        this.innerHTML = this.innerHTML.replace(re,n);
+        return this;
+      }
+      else if(_w.exists(o.parentNode) && _w.exists(n)) {
         o.parentNode.replaceChild(n,o);
         return n;
       }
@@ -370,8 +387,11 @@
       return o;
     };
     $.remove = function(c) {
+      if(typeof arg === "string") {
+        return this.replace(c,"");
+      }
       // remove self
-      if(!_w.exists(c)) { this.parentNode.removeChild(this); }
+      else if(!_w.exists(c)) { this.parentNode.removeChild(this); }
       // remove child by number
       else if(parseInt(c)==c) { this.removeChild(this.children[c]); }
       // remove child by reference
@@ -379,9 +399,7 @@
       return this;
     };
     $.clear = function() {
-      while(this.children.length>0) {
-        this.remove(this.get(0));
-      }
+      this.innerHTML = "";
       return this;
     };
     $.get = function(a) {

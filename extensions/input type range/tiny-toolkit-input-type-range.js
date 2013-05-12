@@ -113,10 +113,12 @@
 
     rails.listen("mousedown", function(evt) {
       if (touchlock) return;
+      find('#testlog').clear().add("mousedown<br>");
       return engageRails(evt);
     });
 
     rails.listen("touchstart", function(evt) {
+      find('#testlog').clear().add("touchstart<br>");
       touchlock = true;
       evt.which = evt.button = 1;
       evt.screenX = evt.touches[0].screenX;
@@ -127,12 +129,14 @@
     document.listen("mousemove", function(evt) {
       if (touchlock) return;
       if (rails.get("sdown") === "true") {
+        find('#testlog').clear().add("mousemove<br>");
         reposition(rails, slider, evt);
       }
     });
 
     document.listen("touchmove", function(evt) {
       if (touchlock && rails.get("sdown") === "true") {
+        find('#testlog').clear().add("touchmove<br>");
         evt.screenX = evt.touches[0].screenX;
         reposition(rails, slider, evt);
       }
@@ -140,10 +144,12 @@
 
     document.listen("mouseup", function(evt) {
       if (touchlock) return;
+      find('#testlog').clear().add("mouseup<br>");
       rails.set("sdown", false);
     });
 
     document.listen("touchend", function(evt) {
+      find('#testlog').clear().add("touchend<br>");
       rails.set("sdown", false);
       touchlock = false;
     })

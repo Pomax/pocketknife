@@ -186,7 +186,7 @@ test( "css/1 - get property value", function() {
   var p = create("p");
   var c = p.css("display");
   ok(!exists(c) || c === "" || c === "block", "correct display value (null, prior to DOM insertion)");
-  document.body.add(p);
+  body.add(p);
   equal(p.css("display"), "block", "correct display value (block, after DOM insertion)");
   p.remove();
 });
@@ -209,7 +209,7 @@ test( "css/2 - set single css property/value pair", function() {
 test( "position", function() {
   var parent = create("div", {"style":"margin:0; padding 0; position:fixed; top:0px; left:0px; right: 0px; bottom:0px; background-color: green"});
   var p = create("div", {"style":"margin: 0; padding: 0; position:fixed; top: 10px; left: 20px; bottom: 30px; right: 40px; background-color: red"});
-  document.body.add(parent);
+  body.add(parent);
   parent.add(p);
   var pos = p.position();
   var pos2 = p.parent().position();
@@ -273,7 +273,7 @@ test( "child get", function() {
 
 test( "show", function() {
   var p = create("p","this is some text");
-  document.body.add(p);
+  body.add(p);
   p.show(true);
   ok(!exists(p.get("data-tiny-toolkit-hidden")), "element is not tiny-toolkit hidden");
   p.show(false);
@@ -283,7 +283,7 @@ test( "show", function() {
 
 test( "toggle", function() {
   var p = create("p","this is some text");
-  document.body.add(p);
+  body.add(p);
   p.show(true);
   p.toggle();
   ok(exists(p.get("data-tiny-toolkit-hidden")), "element is tiny-toolkit hidden after toggle()")
@@ -294,7 +294,7 @@ test( "toggle", function() {
 
 test( "html/0", function() {
   var p = create("p","this is some text");
-  document.body.add(p);
+  body.add(p);
   var html = p.html();
   equal(html, "this is some text", "correct html found");
   p.remove();
@@ -303,7 +303,7 @@ test( "html/0", function() {
 test( "html/1", function() {
   var p = create("p");
   p.html("this is some text");
-  document.body.add(p);
+  body.add(p);
   var html = p.html();
   equal(html, "this is some text", "correct html found");
   p.remove();
@@ -347,7 +347,7 @@ test( "listen + ignore (element)", function() {
   var fired = 0;
   var fn = function() { fired++; };
   p.listen("click", fn);
-  document.body.add(p);
+  body.add(p);
   ok(exists(p.eventListeners), "p has known eventlisteners");
   ok(exists(p.eventListeners.events), "p has a known events list");
   equal(p.eventListeners.events.indexOf("click"), 0, "p has a click event listener");
@@ -377,7 +377,7 @@ test( "listenOnce", function() {
   var fired = 0;
   var fn = function() { fired++; };
   p.listenOnce("click", fn);
-  document.body.add(p);
+  body.add(p);
   ok(exists(p.eventListeners), "p has known eventlisteners");
   equal(p.eventListeners.events.indexOf("click"), 0, "p has a click event listener");
   simulatedClick(p);
@@ -509,7 +509,7 @@ test( "css/2 verified via css/1", function() {
 test( "css/1 (css multi-pair object) verified via css/1", function() {
   var div= create("div");
   div.add(create("p"),create("p"),create("p"),create("p"),create("p"),create("p"));
-  document.body.add(div);
+  body.add(div);
   var result = div.find("p");
   result.css({"backgroundColor":"red", "color":"green", "border":"1px solid blue"});
   var col;
@@ -525,7 +525,7 @@ test( "css/1 (css multi-pair object) verified via css/1", function() {
 test( "position", function() {
   var div= create("div");
   div.add(create("p"),create("p"),create("p"),create("p"),create("p"),create("p"));
-  document.body.add(div);
+  body.add(div);
   var result = div.find("p");
   result = result.position();
   for(var i=0; i<6; i++) {
@@ -622,7 +622,7 @@ test( "child get", function() {
 test( "show", function() {
   var div= create("div");
   div.add(create("p"),create("p"),create("p"),create("p"),create("p"),create("p"));
-  document.body.add(div);
+  body.add(div);
   var result = div.find("p");
   result.show(false);
   for(var i=0; i<6; i++) {
@@ -637,7 +637,7 @@ test( "show", function() {
 test( "toggle", function() {
   var div= create("div");
   div.add(create("p"),create("p"),create("p"),create("p"),create("p"),create("p"));
-  document.body.add(div);
+  body.add(div);
   var result = div.find("p");
   result.show(true).toggle();
   for(var i=0; i<6; i++) {
@@ -672,7 +672,7 @@ test( "html/1", function() {
 test( "listen", function() {
   var div= create("div");
   div.add(create("p","1"),create("p","2"),create("p","3"),create("p","4"),create("p","5"),create("p","6"));
-  document.body.add(div);
+  body.add(div);
   var result = div.find("p");
   var clicks = 0;
   result.listen("click", function() { clicks++; });
@@ -690,7 +690,7 @@ test( "listen", function() {
 test( "listenOnce", function() {
   var div= create("div");
   div.add(create("p","1"),create("p","2"),create("p","3"),create("p","4"),create("p","5"),create("p","6"));
-  document.body.add(div);
+  body.add(div);
   var result = div.find("p");
   var clicks = 0;
   result.listenOnce("click", function() { clicks++; });
@@ -761,19 +761,17 @@ test( "templates", function() {
  */
 test( "input type=range", function() {
   var d = create("input", {"id":"inputrange", "min": 10, "max": 25, "step": 1});
-  document.body.add(d);
+  body.add(d);
   d.set("type","range");
   d = find("#inputrange");
   equal(d.nodeName, "DIV", "transformed to a div");
   equal(d.id, "inputrange", "correct id");
   equal(d.children.length, 1, "transformed to a 1-child div");
 
-  var evt = { "screenX": (document.body.clientWidth/2)|0, button: 1, which: 1 };
+  var evt = { "screenX": (body.clientWidth/2)|0, button: 1, which: 1 };
   d.eventListeners.listeners["mousedown"].forEach(function(f){ f(evt); });
   document.eventListeners.listeners["mouseup"].forEach(function(f){ f(evt); });
   var value = d.get("value");
   equal(value, 17, "slider was repositioned correctly");
-//  document.body.remove(d);
-  (function(){ document.body.add(create("p","&nbsp;")); }());
+  body.remove(d);
 });
-
