@@ -158,8 +158,6 @@
 
     document.listen("touchend", function(evt) {
       find('#testlog').clear().add("touchend<br>");
-      evt.screenX = evt.touches.item(0).screenX;
-      reposition(rails, slider, evt);
       rails.set("sdown", false);
       touchlock = false;
       lastTouch = -1;
