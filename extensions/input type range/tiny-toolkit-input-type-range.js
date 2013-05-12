@@ -136,7 +136,7 @@
 
     document.listen("touchmove", function(evt) {
       if (touchlock && rails.get("sdown") === "true") {
-        find('#testlog').clear().add("touchmove: "+evt.touches.length+"<br>");
+        find('#testlog').clear().add("touchmove: "+evt.touches[0]+"<br>");
         evt.screenX = evt.touches[0].screenX;
         reposition(rails, slider, evt);
       }
