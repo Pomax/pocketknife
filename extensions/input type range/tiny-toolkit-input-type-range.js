@@ -154,6 +154,8 @@
       if (touchlock) return;
       find('#testlog').clear().add("mouseup<br>");
       rails.set("sdown", false);
+      touchlock = false;
+      lastTouch = -1;
     });
 
     document.listen("touchend", function(evt) {
