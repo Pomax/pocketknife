@@ -122,7 +122,7 @@
       find('#testlog').clear().add("touchstart<br>");
       touchlock = true;
       evt.which = evt.button = 1;
-      evt.screenX = evt.touches[0].screenX;
+      evt.screenX = evt.touches.item(0).screenX;
       return engageRails(evt);
     }),
 
@@ -139,7 +139,7 @@
       var now = Date.now();
       if (touchlock && lastTouch===-1 && rails.get("sdown") === "true") {
         lastTouch = now;
-        evt.screenX = evt.touches[0].screenX;
+        evt.screenX = evt.touches.item(0).screenX;
         find('#testlog').clear().add("touchmove: "+evt.screenX+"<br>");
         reposition(rails, slider, evt);
       } else {
@@ -158,7 +158,7 @@
 
     document.listen("touchend", function(evt) {
       find('#testlog').clear().add("touchend<br>");
-      evt.screenX = evt.touches[0].screenX;
+      evt.screenX = evt.touches.item(0).screenX;
       reposition(rails, slider, evt);
       rails.set("sdown", false);
       touchlock = false;
