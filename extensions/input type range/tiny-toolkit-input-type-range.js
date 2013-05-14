@@ -18,16 +18,16 @@
   // take input element, hijack set() so that (type,range)
   // triggers a replacement, *IF* the element is in the DOM.
   (function($) {
-    var originalSetAttribute = $.setAttribute;
-    $.setAttribute = function(name, value) {
+    var originalSet= $.set;
+    $.set = function(name, value) {
       // only intercept type=range
-      if (name !== "type" || value !== "range") {
-        return originalSetAttribute.apply(this, [name, value]);
+      if (!name || name !== "type" || !value || value !== "range") {
+        return originalSet.apply(this, name, value);
       }
       // perform substitution
-      if (this.parent()) {
-        this.replace(substitute(this));
-      }
+      var newRange = substitute(this);
+      if (this.parent()) { this.replace(newRange); }
+      return newRange;
     }
   }(HTMLInputElement.prototype));
 
@@ -118,6 +118,7 @@
     });
 
     rails.listen("touchstart", function(evt) {
+      find("#testlog").add("touch start<br>");
       touchlock = true;
       evt.which = evt.button = 1;
       evt.screenX = evt.touches.item(0).screenX;
@@ -133,12 +134,15 @@
     });
 
     document.listen("touchmove", function(evt) {
+      find("#testlog").add("touch move: ");
       var now = (new Date()).getTime();
       if (touchlock && lastTouch===-1 && rails.get("sdown") === "true") {
         evt.screenX = evt.touches.item(0).screenX;
+        find("#testlog").add(evt.screenX + "<br>");
         reposition(rails, slider, evt);
         lastTouch = now;
       } else {
+        find("#testlog").add("locked<br>");
         if(now-lastTouch>100) {
           lastTouch = -1;
         }
@@ -151,6 +155,7 @@
     });
 
     document.listen("touchend", function(evt) {
+      find("#testlog").add("touch end<br>");
       rails.set("sdown", false);
       touchlock = false;
       lastTouch = -1;
