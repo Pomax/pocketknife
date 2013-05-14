@@ -134,15 +134,14 @@
     });
 
     document.listen("touchmove", function(evt) {
-      find("#testlog").add("touch move: ");
       var now = (new Date()).getTime();
       if (touchlock && lastTouch===-1 && rails.get("sdown") === "true") {
         evt.screenX = evt.touches.item(0).screenX;
-        find("#testlog").add(evt.screenX + "<br>");
+        find("#testlog").add("touch move: " + evt.screenX + "<br>");
         reposition(rails, slider, evt);
         lastTouch = now;
       } else {
-        find("#testlog").add("locked<br>");
+        find("#testlog").add("evaluating touch lock<br>");
         if(now-lastTouch>100) {
           lastTouch = -1;
         }
