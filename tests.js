@@ -762,9 +762,9 @@ test( "templates", function() {
 test( "input type=range", function() {
   var d = create("input", {"id":"inputrange", "min": 10, "max": 25, "step": 1});
   body.add(d);
-  body.add(create("p",{id:'testlog'},"testing<br>"));
   d.set("type","range");
   d = find("#inputrange");
+  body.add(create("p",{id:'testlog'},"testing<br>"));
   equal(d.nodeName, "DIV", "transformed to a div");
   equal(d.id, "inputrange", "correct id");
   equal(d.children.length, 1, "transformed to a 1-child div");
