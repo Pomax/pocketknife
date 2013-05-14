@@ -142,7 +142,6 @@
         lastTouch = now;
       } else {
         if(now-lastTouch>100) {
-          find("#testlog").add("unlocking touch<br>");
           lastTouch = -1;
         }
       }
