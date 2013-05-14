@@ -36,6 +36,13 @@
   margin-left: -0.3em;
 }
 
+.tiny-toolkit-input-type-range-slider.touch-based-sliding {
+  border: 3.3em solid rgb(155, 166, 202);
+  margin-left: -3.3em;
+  margin-top: -3.1em;
+  border-radius: 5em;
+}
+
 .tiny-toolkit-input-type-range-slider.hidden {
   display: none;
 }
