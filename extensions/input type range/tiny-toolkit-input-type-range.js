@@ -141,8 +141,8 @@
         reposition(rails, slider, evt);
         lastTouch = now;
       } else {
-        find("#testlog").add("evaluating touch lock<br>");
         if(now-lastTouch>100) {
+          find("#testlog").add("unlocking touch<br>");
           lastTouch = -1;
         }
       }
