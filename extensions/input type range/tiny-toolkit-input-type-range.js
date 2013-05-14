@@ -155,10 +155,12 @@
     });
 
     document.listen("touchend", function(evt) {
-      find("#testlog").add("touch end<br>");
-      rails.set("sdown", false);
-      touchlock = false;
-      lastTouch = -1;
+      if (touchlock) {
+        find("#testlog").add("touch end<br>");
+        rails.set("sdown", false);
+        touchlock = false;
+        lastTouch = -1;
+      }
     })
 
     // make sure the slider starts at the correct position
