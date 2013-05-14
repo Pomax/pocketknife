@@ -760,6 +760,8 @@ test( "templates", function() {
  * Input type=range
  */
 test( "input type=range", function() {
+  body.add(create("p",{id:'testlog'},"testing<br>"));
+
   var d = create("input", {"id":"inputrange", "min": 10, "max": 25, "step": 1});
   body.add(d);
   d.set("type","range");
