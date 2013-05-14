@@ -118,7 +118,7 @@
     });
 
     rails.listen("touchstart", function(evt) {
-      find("#testlog").add("touch start<br>");
+//      find("#testlog").add("touch start<br>");
       touchlock = true;
       evt.which = evt.button = 1;
       evt.screenX = evt.touches.item(0).screenX;
@@ -137,7 +137,7 @@
       var now = (new Date()).getTime();
       if (touchlock && lastTouch===-1 && rails.get("sdown") === "true") {
         evt.screenX = evt.touches.item(0).screenX;
-        find("#testlog").add("touch move: " + evt.screenX + "<br>");
+//        find("#testlog").add("touch move: " + evt.screenX + "<br>");
         reposition(rails, slider, evt);
         lastTouch = now;
       } else {
@@ -154,7 +154,7 @@
 
     document.listen("touchend", function(evt) {
       if (touchlock) {
-        find("#testlog").add("touch end<br>");
+//        find("#testlog").add("touch end<br>");
         rails.set("sdown", false);
         touchlock = false;
         lastTouch = -1;
