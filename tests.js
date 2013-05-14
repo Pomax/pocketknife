@@ -764,7 +764,6 @@ test( "input type=range", function() {
   body.add(d);
   d.set("type","range");
   d = find("#inputrange");
-  body.add(create("p",{id:'testlog'},"testing<br>"));
   equal(d.nodeName, "DIV", "transformed to a div");
   equal(d.id, "inputrange", "correct id");
   equal(d.children.length, 1, "transformed to a 1-child div");
