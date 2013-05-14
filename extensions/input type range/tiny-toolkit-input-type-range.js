@@ -122,7 +122,6 @@
       touchlock = true;
       evt.which = evt.button = 1;
       evt.screenX = evt.touches.item(0).screenX;
-      slider.classes().add("touch-based-sliding");
       return engageRails(evt);
     }),
 
@@ -156,7 +155,6 @@
     document.listen("touchend", function(evt) {
       if (touchlock) {
         find("#testlog").add("touch end<br>");
-        slider.classes().remove("touch-based-sliding");
         rails.set("sdown", false);
         touchlock = false;
         lastTouch = -1;
