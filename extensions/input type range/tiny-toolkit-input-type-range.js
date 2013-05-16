@@ -13,7 +13,7 @@
 (function(window) {
 
   // is toolkit loaded?
-  if(!window["Toolkit"]) return;
+  if(!window.Toolkit) return;
 
   // take input element, hijack set() so that (type,range)
   // triggers a replacement, *IF* the element is in the DOM.
@@ -28,7 +28,7 @@
       var newRange = substitute(this);
       if (this.parent()) { this.replace(newRange); }
       return newRange;
-    }
+    };
   }(HTMLInputElement.prototype));
 
   /**
@@ -36,7 +36,7 @@
    */
   function reposition(rails, slider, options) {
     if (rails.get("disabled") === "disabled") return;
-    var x = options.screenX,
+    var x = options.clientX,
         rpos = rails.position(),
         min = rpos.left,
         max = rpos.right - slider.position().width,
@@ -50,14 +50,14 @@
           value = ncmin + step*(Math.round(ratio * (ncmax - ncmin) / step));
       if (value > ncmax || value === oldval) return;
       oldval = value;
-      slider.css("left", parseInt(1000 * (value - ncmin) / (ncmax-ncmin)) / 10 + "%");
+      slider.css("left", parseInt(1000 * (value - ncmin) / (ncmax-ncmin),10) / 10 + "%");
       slider.set("title",value);
       rails.set("value",value);
       if (rails.onchange) {
         rails.onchange({value: value});
       }
-    };
-  };
+    }
+  }
 
   // input type="range" --> custom slider replacement
   function substitute(input) {
@@ -103,14 +103,15 @@
 
     // reposition is actually handled by the rails
     var touchlock = false,
-        lastTouch = -1,
-        engageRails = function(evt){
-          if (evt.which === 1 || evt.button === 1) {
-            rails.set("sdown", true);
-            reposition(rails, slider, {screenX: evt.screenX});
-            return false;
-          }
-        };
+        lastTouch = -1;
+
+    var engageRails = function(evt){
+      if (evt.which === 1 || evt.button === 1) {
+        rails.set("sdown", true);
+        reposition(rails, slider, {clientX: evt.clientX});
+        return false;
+      }
+    };
 
     rails.listen("mousedown", function(evt) {
       if (touchlock) return;
@@ -120,7 +121,7 @@
     rails.listen("touchstart", function(evt) {
       touchlock = true;
       evt.which = evt.button = 1;
-      evt.screenX = evt.touches.item(0).screenX;
+      evt.clientX = evt.touches.item(0).clientX;
       return engageRails(evt);
     }),
 
@@ -135,7 +136,7 @@
     document.listen("touchmove", function(evt) {
       var now = (new Date()).getTime();
       if (touchlock && lastTouch===-1 && rails.get("sdown") === "true") {
-        evt.screenX = evt.touches.item(0).screenX;
+        evt.clientX = evt.touches.item(0).clientX;
         reposition(rails, slider, evt);
         lastTouch = now;
       } else {
@@ -143,7 +144,7 @@
           lastTouch = -1;
         }
       }
-    })
+    });
 
     document.listen("mouseup", function(evt) {
       if (touchlock) return;
@@ -156,7 +157,7 @@
         touchlock = false;
         lastTouch = -1;
       }
-    })
+    });
 
     // make sure the slider starts at the correct position
     // before returning the substitution element.
@@ -183,7 +184,7 @@
   }
 
   // bind to toolkit
-  window["Toolkit"].substitute = substitute;
+  window.Toolkit.substitute = substitute;
 
   // general <input type="range"> replacement
   var replaceAllInputRanges = function(ctx) {
@@ -193,7 +194,7 @@
         e.parent().replace(e, substitute(e));
       }
     });
-  }
+  };
 
   // trigger replacements now, and on DOM ready
   replaceAllInputRanges();

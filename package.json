@@ -1,0 +1,13 @@
+{
+  "name": "TinyToolkit",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "node-minify": "~0.7.3"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-cli": "~0.1.8",
+    "grunt-contrib-jshint": "~0.4.3"
+  }
+}

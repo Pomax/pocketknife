@@ -22,20 +22,20 @@
    */
   var Toolkit = {
     version: "2013.05.05"
-  }
+  };
 
   /**
    * bind Toolkit object
    */
-  _w["Toolkit"] = Toolkit;
+  _w.Toolkit = Toolkit;
 
   /**
    * Also set up a "does thing exist?" evaluation function
    */
-  _w["exists"] = (function(undef) {
+  _w.exists = (function(undef) {
     return function(thing) {
       return (thing !== undef) && (thing !== null);
-    }
+    };
   }());
 
   /**
@@ -54,7 +54,7 @@
         };
       }
       if(data) {
-        var fd = new FormData();
+        var fd = new FormData(), name;
         for(name in Object.keys(data)) {
           fd.append(name,data[name]); }
         data = fd; }
@@ -62,16 +62,17 @@
       xhr.send(data);
       if(!async) { return xhr.responseText; }
     };
-    _w["get"] = function(url, callback) { return doXHR("GET", url, null, callback); };
-    _w["post"] = function(url, data, callback) { return doXHR("POST", url, data, callback); };
+    _w.get = function(url, callback) { return doXHR("GET", url, null, callback); };
+    _w.post = function(url, data, callback) { return doXHR("POST", url, data, callback); };
   }(_w));
 
   /**
    * Extend window so that there is a "create" function that we
    * can use instead of the limited document.createElement().
    */
-  _w["create"] = function(tagname, attributes, content) {
-    var element = _d.createElement(tagname);
+  _w.create = function(tagname, attributes, content) {
+    var element = _d.createElement(tagname),
+        property;
     // element attributes
     if(typeof attributes == "object") {
       for(property in attributes) {
@@ -92,10 +93,10 @@
   var find = function(context, selector) {
     var nodelist = context.querySelectorAll(selector),
         elements = [];
-    if (nodelist.length == 0) {
+    if (nodelist.length === 0) {
       return [];
     }
-    if (nodelist.length == 1) {
+    if (nodelist.length === 1) {
       return nodelist[0];
     }
     for(var i = 0, last = nodelist.length; i < last; i++) {
@@ -146,7 +147,8 @@
     this.owner = owner;
     this.events = [];
     this.listeners = {};
-  }
+  };
+
   EventListeners.prototype = {
     record: function(evt, fn) {
       this.events.pushUnique(evt);
@@ -228,7 +230,7 @@
     $.forEach = function(fn) {
       this["元のforEach"](fn);
       return this;
-    }
+    };
     // API implementation
     $.classes = function() {
       if(!this[classesName]) {
@@ -242,7 +244,7 @@
               classes[fn].apply(classes,input);
             });
             return arr;
-          }
+          };
         });
         this[classesName].contains = function() {
           var input = arguments, classes;
@@ -308,7 +310,7 @@
     $.forEach = function(fn) {
       fn(this);
       return this;
-    }
+    };
     $.css = function(prop, val) {
       if(typeof val === "string") {
         this.style[prop] = val;
@@ -318,7 +320,7 @@
         return this;
       }
       if(!val && typeof prop === "object") {
-        for(p in prop) {
+        for(var p in prop) {
           if(Object.hasOwnProperty(prop,p)) continue;
           this.css(p,prop[p]); }
         return this;
@@ -362,11 +364,12 @@
         this.innerHTML += arg;
       }
       else {
+        var e, fn = function(a) { e.add(a); };
         for(var i=0, last=arguments.length; i<last; i++) {
           if(_w.exists(arguments[i])) {
             if(arguments[i] instanceof Array) {
-              var e = this;
-              arguments[i].forEach(function(a) { e.add(a); });
+              e = this;
+              arguments[i].forEach(fn);
             } else { this.appendChild(arguments[i]); }
           }
         }
@@ -393,7 +396,7 @@
       // remove self
       else if(!_w.exists(c)) { this.parentNode.removeChild(this); }
       // remove child by number
-      else if(parseInt(c)==c) { this.removeChild(this.children[c]); }
+      else if(parseInt(c,10)==c) { this.removeChild(this.children[c]); }
       // remove child by reference
       else if(c.parentNode && c.parentNode === this) { this.removeChild(c); }
       return this;
@@ -403,14 +406,14 @@
       return this;
     };
     $.get = function(a) {
-      if(a == parseInt(a)) {
+      if(a == parseInt(a,10)) {
         return this.children[a];
       }
       return this.getAttribute(a);
     };
     $.set = function(a,b) {
       if(!_w.exists(b)) {
-        for(prop in a) {
+        for(var prop in a) {
           if(!Object.hasOwnProperty(a, prop)) {
             this.setAttribute(prop, a[prop]);
           }
@@ -459,7 +462,7 @@
         if (exists(functions)) {
           for (i = functions.length - 1; i >= 0; i--) {
             entity.ignore(s, functions[i]);
-          };
+          }
         }
       }
       return this;

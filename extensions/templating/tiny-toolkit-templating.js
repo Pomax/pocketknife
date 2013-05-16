@@ -4,7 +4,7 @@
 (function(window) {
 
   // is toolkit loaded?
-  if(!window["Toolkit"]) return;
+  if(!window.Toolkit) return;
 
   // list of known templates
   var templates = {};
@@ -17,7 +17,7 @@
         last,
         i;
     // preprocess: conditional blocks
-    while (match = RE.exec(string)) {
+    while (!!(match = RE.exec(string))) {
       props.push(match[1]);
       var found = getConditionals(match[2]);
       for (i = 0, last = found.length; i < last; i++) {
@@ -32,7 +32,7 @@
    * then use this template as the content for <element>.
    * Conditionals are supported mustache-style, so {{#name}}when exists{{/name}}
    */
-  window["Toolkit"].template = function(templateName, replacements) {
+  window.Toolkit.template = function(templateName, replacements) {
     if (!templates[templateName]) {
       templates[templateName] = get(templateName+".tpl.html");
     }
@@ -65,13 +65,13 @@
     replaced = replaced.replace(new RegExp("{{[^|]+\\s*\\|\\s*([^}]*)}}",'g'), "$1");
 
     return replaced;
-  }
+  };
 
   /**
    * turn a template into a DOM fragment
    */
-  window["template"] = function(name, macros) {
-    var top = create("div", window["Toolkit"].template(name,macros));
+  window.template = function(name, macros) {
+    var top = create("div", window.Toolkit.template(name,macros));
     var children = [];
     for(var i=0; i<top.children.length; i++) {
       children.push(top.children.item(i));
