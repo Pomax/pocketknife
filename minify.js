@@ -10,10 +10,11 @@ var fs = require("fs"),
     ];
 
 files.forEach(function minify(file) {
+  var filename = file.substring(file.lastIndexOf('/')+1);
   console.log("Minifying "+file);
   new compressor.minify({
     type: 'gcc',
     fileIn: file + '.js',
-    fileOut: file + '-min.js'
+    fileOut: "release/" + filename+ '-min.js'
   });
 });

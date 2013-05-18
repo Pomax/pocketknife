@@ -75,10 +75,14 @@
         property;
     // element attributes
     if(typeof attributes == "object") {
+//      /*
       for(property in attributes) {
-        if(Object.hasOwnProperty(attributes,property)) continue;
-        element.setAttribute(property, attributes[property]);
+        if(attributes.hasOwnProperty(property)) {
+          element.setAttribute(property, attributes[property]);
+        }
       }
+//      */
+//      element.set(attributes);
     }
     if (typeof attributes === "string") { content = attributes; }
     if(content) { element.innerHTML = content; }
@@ -224,13 +228,13 @@
       }
       return false;
     };
-    // cache the original forEach function
-    $["元のforEach"] = $.forEach;
-    // then make forEach() a chaining function
-    $.forEach = function(fn) {
-      this["元のforEach"](fn);
-      return this;
-    };
+    // make forEach() a chaining function
+    $.forEach = function(forEach) {
+      return function(fn) {
+        forEach.call(this,fn);
+        return this;
+      };
+    }($.forEach);
     // API implementation
     $.classes = function() {
       if(!this[classesName]) {
