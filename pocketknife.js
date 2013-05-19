@@ -50,8 +50,11 @@
           async = exists(callback);
       xhr.open(method, url, async);
       if(async) {
-        xhr.onload = function() {
-          callback(xhr);
+        xhr.withCredentials = true;
+        xhr.onreadystatechange = function() {
+          if(xhr.readyState===4 && (xhr.status===200||xhr.status===0)) {
+            callback(xhr);
+          }
         };
       }
       if(data) {
@@ -59,7 +62,6 @@
         for(name in Object.keys(data)) {
           fd.append(name,data[name]); }
         data = fd; }
-      xhr.withCredentials = true;
       xhr.send(data);
       if(!async) { return xhr.responseText; }
     };
