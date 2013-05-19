@@ -75,14 +75,11 @@
         property;
     // element attributes
     if(typeof attributes == "object") {
-//      /*
       for(property in attributes) {
         if(attributes.hasOwnProperty(property)) {
           element.setAttribute(property, attributes[property]);
         }
       }
-//      */
-//      element.set(attributes);
     }
     if (typeof attributes === "string") { content = attributes; }
     if(content) { element.innerHTML = content; }
@@ -492,9 +489,27 @@
     _d.head.add(sheet);
   }(hiderule));
 
-  // This is the worst thing: an IE hack. For some reason,
-  // IE's "p" has a .clear property, for no good reason.
+  /**
+   * Final steps
+   */
   (function(){
+    /**
+     * top-level handling function for functions that are normally
+     * added using document.addEventListener("DOMContentLoaded"...)
+     * or jQuery's $.ready(...)
+     */
+    _w.schedule = function(fn) {
+      if (_w.ready) { return fn(); }
+      _d.listenOnce("DOMContentLoaded",fn);
+    };
+
+    // relied on by the above function
+    var rd = function() { _w.ready = true; };
+    if (["complete","loaded","interactive"].indexOf(_d.readyState) !== -1) { rd(); }
+    else { _d.listenOnce("DOMContentLoaded", rd); }
+
+    // This is the worst thing: an IE hack. For some reason,
+    // IE's "p" has a .clear property, for no good reason.
     delete HTMLParagraphElement.prototype.clear;
   }());
 
