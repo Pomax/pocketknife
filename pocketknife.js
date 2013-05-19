@@ -1,14 +1,15 @@
 /**
 
   This is a tiny "I don't need the full jQuery API"
-  toolkit. It has a small API, and acts more as a
+  Pocketknife. It has a small API, and acts more as a
   JS API enrichment than a "library". You don't call
-  functions on $ or Toolkit or something, you just
+  functions on $ or Pocketknife or something, you just
   call functions in global scope or on HTML elements
   and arrays. If that seems bad, don't use this.
 
 **/
 (function(_w, _d) {
+  "use strict";
 
   /**
    * Give things a foreach.
@@ -18,16 +19,16 @@
   Array.prototype.forEach;
 
   /**
-   * Toolkit object, for accessing the update() function
+   * Pocketknife object, for accessing the update() function
    */
-  var Toolkit = {
-    version: "2013.05.05"
+  var Pocketknife = {
+    version: "2013.05.19"
   };
 
   /**
-   * bind Toolkit object
+   * bind Pocketknife object
    */
-  _w.Toolkit = Toolkit;
+  _w.Pocketknife = Pocketknife;
 
   /**
    * Also set up a "does thing exist?" evaluation function
@@ -134,8 +135,8 @@
 *************************************************************************/
 
 
-  var hiderule = "data-tiny-toolkit-hidden";
-  var classesName = "内のclasses";
+  var hiderule = "data-pocketknife-hidden";
+  var classesName = "内組";
 
 
 /*************************************************************************/
@@ -169,7 +170,7 @@
    * don't let us decorate them to make them chaining functions,
    * so: too bad, so sad, and we implement our own class list.
    */
-  ClassList = function(owner) {
+  var ClassList = function(owner) {
     this.owner = owner;
     var classAttr = owner.getAttribute("class");
     this.classes = (!classAttr ? [] : classAttr.split(/\s+/));
@@ -217,7 +218,7 @@
     // public helper for "do any of the elements in this array pass this test"
     $.test = function(f, strict) {
       if (strict !== true) strict = false;
-      var i, len=this.length;
+      var i, len=this.length, t;
       for(i=0; i<len; i++) {
         t = f(this[i]);
         if(strict && !t) return false;
@@ -289,11 +290,14 @@
     // functions that get applied to all elements, returning the array-of-results:
     ["position", "html", "css", "get"].forEach(function(fn) {
       $[fn] = function() {
-        var result = [];
-            input = arguments;
-        this.forEach(function(e) {
-          result.push(e[fn].apply(e, input));
-        });
+        var result = [],
+            input = arguments,
+            forEachFn = (function(result, input) {
+              return function(e) {
+                result.push(e[fn].apply(e, input));
+              };
+            }(result, input));
+        this.forEach(forEachFn);
         return result;
       };
     });
@@ -338,8 +342,8 @@
       return this[classesName];
     };
     $.show = function(yes) {
-      if(yes) { this.removeAttribute(hiderule); }
-      else { this.setAttribute(hiderule,""); }
+      if(yes) { this.set(hiderule,false); }
+      else { this.set(hiderule,"true"); }
       return this;
     };
     $.toggle = function() {

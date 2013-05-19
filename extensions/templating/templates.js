@@ -2,9 +2,10 @@
   Quasi-handlerbar templating
 **/
 (function(window) {
+  "use strict";
 
-  // is toolkit loaded?
-  if(!window.Toolkit) return;
+  // is Pocketknife loaded?
+  if(!window.Pocketknife) return;
 
   // list of known templates
   var templates = {};
@@ -32,13 +33,13 @@
    * then use this template as the content for <element>.
    * Conditionals are supported mustache-style, so {{#name}}when exists{{/name}}
    */
-  window.Toolkit.template = function(templateName, replacements) {
+  window.Pocketknife.template = function(templateName, replacements) {
     if (!templates[templateName]) {
       templates[templateName] = get(templateName+".tpl.html");
     }
 
     var replaced = templates[templateName],
-        props = [], i, last = 0, prop;
+        props = [], i, last = 0, prop, RE;
 
     props = getConditionals(replaced, props);
     last = props.length;
@@ -71,11 +72,8 @@
    * turn a template into a DOM fragment
    */
   window.template = function(name, macros) {
-    var top = create("div", window.Toolkit.template(name,macros));
-    var children = [];
-    for(var i=0; i<top.children.length; i++) {
-      children.push(top.children.item(i));
-    }
+    var top = create("div", window.Pocketknife.template(name,macros)),
+        children = Array.prototype.slice.apply(top.children);
     return (children.length === 1 ? children[0] : children);
   };
 

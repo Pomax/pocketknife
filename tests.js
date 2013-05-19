@@ -1,3 +1,5 @@
+var hiderule = "data-pocketknife-hidden";
+
 // IE and Safari don't support .click() on elements. Simulate using faked event.
 function simulatedClick(target) {
   var t = (target===document ? document : target.ownerDocument);
@@ -275,9 +277,9 @@ test( "show", function() {
   var p = create("p","this is some text");
   body.add(p);
   p.show(true);
-  ok(!exists(p.get("data-tiny-toolkit-hidden")), "element is not tiny-toolkit hidden");
+  ok(!exists(p.get(hiderule)), "element is not tiny-toolkit hidden");
   p.show(false);
-  ok(exists(p.get("data-tiny-toolkit-hidden")), "element is tiny-toolkit hidden after show(false)")
+  ok(exists(p.get(hiderule)), "element is tiny-toolkit hidden after show(false)")
   p.remove();
 });
 
@@ -286,9 +288,9 @@ test( "toggle", function() {
   body.add(p);
   p.show(true);
   p.toggle();
-  ok(exists(p.get("data-tiny-toolkit-hidden")), "element is tiny-toolkit hidden after toggle()")
+  ok(exists(p.get(hiderule)), "element is tiny-toolkit hidden after toggle()")
   p.toggle();
-  ok(!exists(p.get("data-tiny-toolkit-hidden")), "element is tiny-toolkit hidden after toggle() number two")
+  ok(!exists(p.get(hiderule)), "element is tiny-toolkit hidden after toggle() number two")
   p.remove();
 });
 
@@ -626,11 +628,11 @@ test( "show", function() {
   var result = div.find("p");
   result.show(false);
   for(var i=0; i<6; i++) {
-    ok(exists(result[i].get("data-tiny-toolkit-hidden")), "element was hidden");
+    ok(exists(result[i].get(hiderule)), "element was hidden");
   }
   result.show(true);
   for(var i=0; i<6; i++) {
-    ok(!exists(result[i].get("data-tiny-toolkit-hidden")), "element was not hidden");
+    ok(!exists(result[i].get(hiderule)), "element was not hidden");
   }
 });
 
@@ -641,11 +643,11 @@ test( "toggle", function() {
   var result = div.find("p");
   result.show(true).toggle();
   for(var i=0; i<6; i++) {
-    ok(exists(result[i].get("data-tiny-toolkit-hidden")), "element was hidden");
+    ok(exists(result[i].get(hiderule)), "element was hidden");
   }
   result.toggle();
   for(var i=0; i<6; i++) {
-    ok(!exists(result[i].get("data-tiny-toolkit-hidden")), "element was not hidden");
+    ok(!exists(result[i].get(hiderule)), "element was not hidden");
   }
 })
 

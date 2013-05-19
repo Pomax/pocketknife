@@ -1,19 +1,20 @@
 /**
-  A Tiny Toolkit extension that makes all browsers do the
+  A Tiny Pocketknife extension that makes all browsers do the
   same thing for <input type="range"> elements. It replaces
   them with a <div> rail and <span> slide head. The attribute
   API is the same as for <input type="range">, but the only
   JavaScript event offered is onchange. It'll do a full
-  document replacement on DOMContentLoaded, and shims toolkit
+  document replacement on DOMContentLoaded, and shims Pocketknife
   so that create("input") will lead to a replacement when
   .set("type","range") is called -- it also extends the
-  Toolkit.update() function so that any stray <input type="range">
+  Pocketknife.update() function so that any stray <input type="range">
   elements are converted when update is called.
 **/
 (function(window) {
+  "use strict";
 
-  // is toolkit loaded?
-  if(!window.Toolkit) return;
+  // is Pocketknife loaded?
+  if(!window.Pocketknife) return;
 
   // take input element, hijack set() so that (type,range)
   // triggers a replacement, *IF* the element is in the DOM.
@@ -75,9 +76,9 @@
         },
         rails = create("div", props);
     if (input.onchange) { rails.onchange = input.onchange; }
-    rails.classes().add("tiny-toolkit-input-type-range");
+    rails.classes().add("pocketknife-range");
 
-    var slider = create("span", {"class":"tiny-toolkit-input-type-range-slider"});
+    var slider = create("span", {"class":"pocketknife-range-slider"});
     slider.set("title", props.value);
     rails.add(slider);
 
@@ -183,8 +184,8 @@
     return rails;
   }
 
-  // bind to toolkit
-  window.Toolkit.substitute = substitute;
+  // bind to Pocketknife
+  window.Pocketknife.substitute = substitute;
 
   // general <input type="range"> replacement
   var replaceAllInputRanges = function(ctx) {

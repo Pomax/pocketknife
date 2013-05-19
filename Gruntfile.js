@@ -8,7 +8,7 @@ module.exports = function( grunt ) {
       files: [
         "Gruntfile.js",
         "minify.js",
-        "tiny-toolkit.js",
+        "pocketknife.js",
         "extensions/**/*.js"
       ]
     }
