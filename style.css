@@ -1,0 +1,42 @@
+section {
+  margin: 1em;
+  border: 1px solid black;
+}
+
+section h3 {
+  background: #DDD;
+  margin: 0;
+}
+
+section p {
+  margin: 0;
+}
+
+section p+p {
+  top-margin: 1.5em;
+}
+
+section h4 {
+  background: #CCC;
+}
+
+section dl {
+
+}
+
+section dl dt {
+
+}
+
+section dl dd {
+
+}
+
+section ul {
+  list-style: none;
+  padding: 0;
+}
+
+section ul li {
+  padding: 0;
+}

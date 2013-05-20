@@ -775,5 +775,5 @@ test( "input type=range", function() {
   document.eventListeners.listeners["mouseup"].forEach(function(f){ f(evt); });
   var value = d.get("value");
   equal(value, 17, "slider was repositioned correctly");
-  body.remove(d);
+//  body.remove(d);
 });
