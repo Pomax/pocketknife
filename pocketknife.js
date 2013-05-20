@@ -1,7 +1,7 @@
 /**
 
   This is a tiny "I don't need the full jQuery API"
-  Pocketknife. It has a small API, and acts more as a
+  library. It has a small API, and acts more as a
   JS API enrichment than a "library". You don't call
   functions on $ or Pocketknife or something, you just
   call functions in global scope or on HTML elements
@@ -114,13 +114,6 @@
    */
   _w.find = function(selector) { return find(_d, selector); };
 
-
-  /**
-   * For DOM manipulation, we really want 'head' and 'body' to just
-   * be global variables.
-   */
-  _w.head = document.head;
-  _w.body = document.body;
 
 /*************************************************************************
 
@@ -513,6 +506,13 @@
     var rd = function() { _w.ready = true; };
     if (["complete","loaded","interactive"].indexOf(_d.readyState) !== -1) { rd(); }
     else { _d.listenOnce("DOMContentLoaded", rd); }
+
+    /**
+     * For DOM manipulation, we really want 'head' and 'body' to just
+     * be global variables.
+     */
+    _w.schedule(function() { _w.head = document.head; });
+    _w.schedule(function() { _w.body = document.body; });
 
     // This is the worst thing: an IE hack. For some reason,
     // IE's "p" has a .clear property, for no good reason.

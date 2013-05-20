@@ -1,82 +1,349 @@
 <!doctype html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <title>Tiny Toolkit unit tests</title>
-</head>
-<body>
-  <div>
-    <h1>Pocketknife, for when jQuery is way too much.</h1>
+    <head>
+      <meta charset="utf-8">
+      <title>Pocketknife.js</title>
+      <script src="pocketknife.js"></script>
+    </head>
+    <body>
+      <h1>Pocketknife, for when you don't need a full blown jQuery.</h1>
 
-    <p>The most important reason this page exists is
-    to act as online "does tiny-toolkit pass the unit tests
-    in your browser?" live github site. (<a href="test.html">Find
-    out here</a>, btw. Source repo <a href="http://github.com/pomax/tiny-toolkit">here</a>)</p>
+      <p>Pocketknife is a small library (~6.5KB) that upgrades the browser's
+      JavaScript API for working with the DOM and its representation.
+      Think of it as a pocket knife for DOM stuff, contrasted to
+      jQuery's squadron of helicopter gunships. Pocketknife homogenises
+      the API between individual HTML elements and lists of HTML
+      elements, allowing most functions to be chained (meaning the
+      function returns the object you called the function on, so
+      you can call another function). It extends the <code>window</code>
+      object with a few new functions, too, because they have been
+      sorely lacking.</p>
 
-    <p>With that said...</p>
+      <p>So just in case we're not clear: this is not a self-contained
+      library, it bolts many new things straight into the already established
+      objects we use for DOM/page manipulation, although without clobbering
+      (most of) them. If your scripts worked before, they should still work
+      if you load this library. Unless you wrote your own pocketknife functions,
+      in which case, yes, there will be conflict resolution and the last loaded
+      code will win.</p>
 
-    <h2>Tiny Toolkit</h2>
+      <h2>new global functions</h2>
 
-    <p>Tiny toolkit is a small (I'm trying to keep it near 10kb,
-    it's a little over atm, but at least it minifies to 5kb)
-    library that expands the JS API for HTML elements, element
-    creation, and element query selecting. Think of it as a
-    pocket knife for DOM stuff, contrasted to jQuery's
-    squadron of helicopter gunships.</p>
+      <section>
+        <h3>create</h3>
 
-    <p>One thing it does quite well is not care about whether your
-    selector found zero, one, or multiple results. The API
-    will be the same, so none of that crazy $("p")[0] nonsense:
-    just use find("p") and if there's only one result, that
-    will be a normal HTML element. With extended API. If there's
-    more, it'll be an array. With the same extended API.</p>
+        <p>The <code>create</code> function is a shorthand function for
+        creating HTML elements. Along with the conventional tag, all
+        element attributes and the innerHTML content can be passed into
+        the <code>create</code> function.</p>
 
-    <p>Most functions chain, meaning you can do things like:</p>
+        <h4>syntax</h4>
 
-    <pre>
-        document.body.add(
-          create("div", {id: "temp"}, "This is a temp div")
-          .show(false)
-        ).find("#temp")
-         .parent()
-         .get(0)
-         .remove()
-    </pre>
+        <dl>
+          <dt>create("tag")</dt>
+          <dd></dd>
+          <dt>create("tag", {property:value, ...})</dt>
+          <dd></dd>
+          <dt>create("tag", "innerHTML")</dt>
+          <dd></dd>
+          <dt>create("tag", {property:value, ...}, "innerHTML")</dt>
+          <dd></dd>
+        </dl>
 
-    <p>(yes, that's a very elaborate way to effect a net result
-    of no change - make div, add div, make div invisible, find
-    div in body, get div's parent, which is body, get body's
-    first child, which is div, then tell that to remove itself)</p>
+        <h4>examples</h4>
+      </section>
 
-    <p>Note that tiny toolkit "installs" itself into the DOM API.
-    As such, it's not so much a library as bolt-on JS API
-    extension. It changes the Array and HTMLElement prototypes,
-    and this may break things. If you don't like that, don't
-    use this. Frankly, the Array and HTMLElement JS APIs are
-    long overdue for an update, and it was starting to annoy
-    me to no end. So this fixed that for me. Hopefully it
-    fixes things for you too =)</p>
+      <section>
+        <h3>exists</h3>
+        <p>The <code>exists</code> function is a way to circumvent JavaScript's
+        type coercion. Normally "false", 0, NaN, and "" are considered false,
+        which can be rather inconvenient when a variable is set, it just happens
+        to have one of these values. This function exists to make it less hassle
+        to test a var for whether it's been declared, even if its value would
+        normally coerce to false.</p>
+        <h4>syntax</h4>
+        <dl>
+          <dt>exists([anything])</dt>
+          <dd></dd>
+        </dl>
+        <h4>examples</h4>
+      </section>
 
-    <p>Another thing to note is that most of what tiny toolkit does
-    is API improvements. Most of the functionality is already part
-    of the DOM API, but with unintuitive naming and only partial
-    behaviours implemented. For instance, getting an element's
-    attribute X is p.getAttribute("X"), and getting its first
-    child is p.children[0]. That makes sense from a bottom-up
-    programming model, but as a human I like top-down. I just want
-    a .get that gets me the right thing, so now it does: p.get("x")
-    gets the content for attribute "x" and p.get(0) gets the first
-    child from the list of children. Short, obvious. Most of the
-    API improvements tiny toolkit effects are of this nature.
+      <section>
+        <h3>find</h3>
+        <p>The <code>find</code> function is your basic CSS selector function.
+        It's a shorthand for <code>document.querySelectorAll</code>, except that
+        if the result is one element, it returns that element. For zero or more
+        than one results, it returns an array.</p>
+        <h4>syntax</h4>
+        <dl>
+          <dt></dt>
+          <dd></dd>
+        </dl>
+        <h4>examples</h4>
+      </section>
 
-    <p>If you're still into this, head over to the repo's
-    <a href="https://github.com/Pomax/pocketknife/blob/gh-pages/README.md">README.md</a>
-    for the API. I'll be turning this index.html into a more
-    sensible, better API documentation soon.</p>
+      <section>
+        <h3>get</h3>
+        <p>The <code>get</code> function is a shorthand URL "GET" function.</p>
+        <h4>syntax</h4>
+        <dl>
+          <dt>get("url")</dt>
+          <dd></dd>
+          <dt>get("url", callback function)</dt>
+          <dd></dd>
+        </dl>
+        <h4>examples</h4>
+      </section>
 
-    <p>- Pomax</p>
-  </div>
+      <section>
+        <h3>post</h3>
+        <p>The <code>post</code> function is a shorthand URL "POST" function.</p>
+        <h4>syntax</h4>
+        <dl>
+          <dt>post("url", {data:value,...})</dt>
+          <dd></dd>
+          <dt>post("url", {data:value,...}, callback function)</dt>
+          <dd></dd>
+        </dl>
+        <h4>examples</h4>
+      </section>
 
-  <Script src="pocketknife.js"></script>
-</body>
+      <section>
+        <h3>schedule</h3>
+        <p>This function is akin to jQuery's $.ready(), with any function that you
+        pass it getting executed after the DOMContentLoaded event fires. If you
+        call <code>schedule</code> before the event fires, your function is queued
+        up to fire when it does. If called after the event has fired, your function
+        will execute immediately.</p>
+        <h4>syntax</h4>
+        <dl>
+          <dt>schedule(function)</dt>
+          <dd></dd>
+        </dl>
+        <h4>examples</h4>
+      </section>
+
+      <h2>new global properties</h2>
+
+      <section>
+        <h3>head</h3>
+        <p>This makes your document's <code>document.head</code> reference a first class citizen.</p>
+        <h4>examples</h4>
+      </section>
+
+      <section>
+        <h3>body</h3>
+        <p>This makes your document's <code>document.body</code> reference a first class citizen.</p>
+        <h4>examples</h4>
+      </section>
+
+      <section>
+        <h3>ready</h3>
+        <p>This boolean value indicates whether or not the DOMContentLoaded event has fired
+        or not. You can use this to bypass the <code>schedule</code> function, although
+        this is generally not a very smart idea, as the <code>schedule</code> function will
+        make sure to clean up the event listener after your function is fired.</p>
+        <h4>examples</h4>
+      </section>
+
+      <h2>HTML Element extensions</h2>
+
+      <section>
+        <h3>forEach</h3>
+        <p>The <code>forEach</code> function exists to homogenise the API between
+        single HTML elements and arrays of HTML elements. For a single element,
+        calling the forEach function will run once, and run the element itself
+        for function chaining.</p>
+        <h4>syntax</h4>
+        <h4>examples</h4>
+      </section>
+
+      <section>
+        <h3>css</h3>
+        <p>Get or set one or more CSS properties for this element</p>
+        <h4>syntax</h4>
+        <h4>examples</h4>
+      </section>
+
+      <section>
+        <h3>position</h3>
+        <p>...</p>
+        <h4>syntax</h4>
+        <h4>examples</h4>
+      </section>
+
+      <section>
+        <h3>classes</h3>
+        <p>...</p>
+        <h4>syntax</h4>
+        <h4>examples</h4>
+      </section>
+
+      <section>
+        <h3>show</h3>
+        <p>Show, or hide, this element.</p>
+        <h4>syntax</h4>
+        <h4>examples</h4>
+      </section>
+
+      <section>
+        <h3>toggle</h3>
+        <p>Toggle visibility for this element</p>
+        <h4>syntax</h4>
+        <h4>examples</h4>
+      </section>
+
+      <section>
+        <h3>html</h3>
+        <p>Get, or set, the innerHTML content.</p>
+        <h4>syntax</h4>
+        <h4>examples</h4>
+      </section>
+
+      <section>
+        <h3>parent</h3>
+        <p>Get the current parent or assign a new one.</p>
+        <h4>syntax</h4>
+        <h4>examples</h4>
+      </section>
+
+      <section>
+        <h3>add</h3>
+        <p>Replace an element, or append a text fragment to the innerHTML context.</p>
+        <h4>syntax</h4>
+        <h4>examples</h4>
+      </section>
+
+      <section>
+        <h3>replace</h3>
+        <p>Replace this element, one of its children, or a text fragment in the
+        innerHTML context.</p>
+        <h4>syntax</h4>
+        <h4>examples</h4>
+      </section>
+
+      <section>
+        <h3>remove</h3>
+        <p>Remove this element, one of its children, or a text fragment from the
+        innerHTML context.</p>
+        <h4>syntax</h4>
+        <h4>examples</h4>
+      </section>
+
+      <section>
+        <h3>clear</h3>
+        <p>Clear this element's content.</p>
+        <h4>syntax</h4>
+        <h4>examples</h4>
+      </section>
+
+      <section>
+        <h3>get</h3>
+        <p>Get an attribute value, or a child node.</p>
+        <h4>syntax</h4>
+        <h4>examples</h4>
+      </section>
+
+      <section>
+        <h3>set</h3>
+        <p>Set one or more element attributes, or a child node.</p>
+        <h4>syntax</h4>
+        <h4>examples</h4>
+      </section>
+
+      <section>
+        <h3>find</h3>
+        <p>The same shorthand function as the global <code>find</code>, except restricted
+        to this element's DOM subtree.</p>
+        <h4>syntax</h4>
+        <h4>examples</h4>
+      </section>
+
+      <section>
+        <h3>listen</h3>
+        <p>A shorthand for <code>addEventListener</code>, defaulting to useCapture=false,
+        which you're likely to be using anyway.</p>
+        <h4>syntax</h4>
+        <h4>examples</h4>
+      </section>
+
+      <section>
+        <h3>listenOnce</h3>
+        <p>This lets you set up a one-time event listener, which unloads itself once
+        invoked.</p>
+        <h4>syntax</h4>
+        <h4>examples</h4>
+      </section>
+
+      <section>
+        <h3>ignore</h3>
+        <p>Stop listening to either a specific event, or selectively unload a set up
+        listener for a specific event.</p>
+        <h4>syntax</h4>
+        <h4>examples</h4>
+      </section>
+
+      <section>
+        <h3>eventListeners</h3>
+        <p>This property represents all known event listeners that have been bound to
+        this element.</p>
+        <h4>syntax</h4>
+        <h4>examples</h4>
+      </section>
+
+      <h2>Array extensions</h2>
+
+      <section>
+        <h3>pushUnique</h3>
+        <p>Similar to the <code>push</code> function, the <code>pushUnique</code> puts
+        something in an array only if it is not in there already.</p>
+        <h4>syntax</h4>
+        <h4>examples</h4>
+      </section>
+
+      <section>
+        <h3>test</h3>
+        <p>The <code>test</code> function allows you to test all the elements in an
+        array for certain properties. Loose and strict testing allows you to test based
+        on 'at least one passes the test' and 'all elements pass the test'.</p>
+        <h4>syntax</h4>
+        <h4>examples</h4>
+      </section>
+
+      <section>
+        <h3>forEach</h3>
+        <p>Similar to the <code>forEach</code> you're used to, except now it's a returning
+        function, to allow function chaining.</p>
+        <h4>syntax</h4>
+        <h4>examples</h4>
+      </section>
+
+      <section>
+        <p>Array also implements the following HTML element functions, which when called
+        return an array with the function called on each element of individually. I.E.,
+        calling list.toggle() returns [list[0].toggle(), list[1].toggle(), ...]</p>
+
+        <ul>
+          <li>add</li>
+          <li>replace</li>
+          <li>show</li>
+          <li>toggle</li>
+          <li>get</li>
+          <li>set</li>
+          <li>add</li>
+          <li>replace</li>
+          <li>remove</li>
+          <li>clear</li>
+          <li>listen</li>
+          <li>listenOnce</li>
+          <li>ignore</li>
+          <li>find</li>
+          <li>parent</li>
+          <li>position</li>
+          <li>css</li>
+          <li>html</li>
+        </ul>
+      </section>
+    </body>
 </html>
