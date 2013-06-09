@@ -208,10 +208,15 @@
    * because we want to install our library, not "use" it.
    */
   (function($){
+    var tack = function(name, fn) {
+      Object.defineProperty($,name, { value: fn });
+    };
+
     // public helper for "add only if not already added"
-    $.pushUnique = function(e) { if(this.indexOf(e) === -1) { this.push(e); }};
+    tack("pushUnique", function(e) { if(this.indexOf(e) === -1) { this.push(e); }});
+
     // public helper for "do any of the elements in this array pass this test"
-    $.test = function(f, strict) {
+    tack("test", function(f, strict) {
       if (strict !== true) strict = false;
       var i, len=this.length, t;
       for(i=0; i<len; i++) {
@@ -220,16 +225,16 @@
         if(t && !strict) return true;
       }
       return false;
-    };
+    });
     // make forEach() a chaining function
-    $.forEach = function(forEach) {
+    tack("forEach", function(forEach) {
       return function(fn) {
         forEach.call(this,fn);
         return this;
       };
-    }($.forEach);
+    }($.forEach));
     // API implementation
-    $.classes = function() {
+    tack("classes", function() {
       if(!this[classesName]) {
         this[classesName] = {};
         var arr = this;
@@ -252,27 +257,27 @@
         };
       }
       return this[classesName];
-    };
+    });
     // functions that will end up applying only to the first element:
-    ["add", "replace"].forEach(function(fn){
-      $[fn] = function() {
+    ["add", "replace"].forEach(function(fn) {
+      tack(fn, function() {
         var e = this[0];
         return e[fn].apply(e, arguments);
-      };
+      });
     });
     // functions that get applied to all elements, returning the array:
     ["show", "toggle", "set", "remove", "clear", "listen", "ignore", "listenOnce"].forEach(function(fn){
-      $[fn] = function() {
+      tack(fn, function() {
         var input = arguments;
         this.map(function(e) {
           e[fn].apply(e, input);
         });
         return this;
-      };
+      });
     });
     // aggregating functions with the same aggregation shape:
     ["find", "parent"].forEach(function(fn) {
-      $[fn] = function() {
+      tack(fn, function() {
         var results = [];
         this.forEach(function(e) {
           e[fn].apply(e,arguments).forEach(function(r) {
@@ -280,11 +285,11 @@
           });
         });
         return results;
-      };
+      });
     });
     // functions that get applied to all elements, returning the array-of-results:
     ["position", "html", "css", "get"].forEach(function(fn) {
-      $[fn] = function() {
+      tack(fn, function() {
         var result = [],
             input = arguments,
             forEachFn = (function(result, input) {
@@ -294,7 +299,7 @@
             }(result, input));
         this.forEach(forEachFn);
         return result;
-      };
+      });
     });
   }(Array.prototype));
 
