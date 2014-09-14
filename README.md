@@ -1,7 +1,7 @@
 Some JavaScript API Extensions
 ==============================
 
-Tiny toolkit is a small (I'm trying to keep it near 10kb, it's a little over atm, but at least it minifies to 5kb) library that expands the JS API for HTML elements, element creation, and element query selecting. Think of it as a pocket knife for DOM stuff, contrasted to jQuery's squadron of helicopter gunships.
+Pocketknife is a small (I'm trying to keep it near 10kb, it's a little over atm, but at least it minifies to 5kb) library that expands the JS API for HTML elements, element creation, and element query selecting. Think of it as a pocket knife for DOM stuff, contrasted to jQuery's squadron of helicopter gunships.
 
 One thing it does quite well is not care about whether your selector found zero, one, or multiple results. The API will be the same, so none of that crazy $("p")[0] nonsense: just use find("p") and if there's only one result, that will be a normal HTML element. With extended API. If there's more, it'll be an array. With the same extended API.
 
