@@ -17,7 +17,7 @@ Most functions chain, meaning you can do things like:
 
 (yes, that's a very elaborate way to effect a net result of no change - make div, add div, make div invisible, find div in body, get div's parent, which is body, get body's first child, which is div, then tell that to remove itself).
 
-Note that tiny toolkit "installs" itself into the DOM API. As such, it's not so much a library as bolt-on JS API extension. It changes the Array and HTMLElement prototypes, and this may break things. If you don't like that, don't use this. Frankly, the Array and HTMLElement JS APIs are long overdue for an update, and it was starting to annoy me to no end. So this fixed that for me. Hopefully it fixes things for you too =)
+Note that pocketknife "installs" itself into the DOM API. As such, it's not so much a library as bolt-on JS API extension. It changes the Array and HTMLElement prototypes, and this may break things. If you don't like that, don't use this. Frankly, the Array and HTMLElement JS APIs are long overdue for an update, and it was starting to annoy me to no end. So this fixed that for me. Hopefully it fixes things for you too =)
 
 Extended Window API
 -------------------
@@ -87,8 +87,8 @@ These can currently be called on any JavaScript array. I will likely modify the 
 In addition to this, all the chaining HTML Element API functions are supported. When called, these will run for all elements. For getters, this will return an array of the same size as the element array, with return values in the same place as the original elements: [e1,e2,e3].get("style") when only e2 has a style attribute with display:inline will return ["", "display: inline", ""], for instance.
 
 
-Extensions that use tiny-toolkit
---------------------------------
+Extensions that use pocketknife
+-------------------------------
 
 For convenience (and of course because I needed them myself) there are two extensions right now. One for loading simple templates, and one for ensuring that type=range inputs work in all browsers, and look the same. You can find these as:
 
@@ -102,6 +102,6 @@ The first extension has no API. It should just work whenever you use type=range 
 Tests
 -----
 
-There's a battery of tests for the API (visit http://pomax.github.com/tiny-toolkit/test.html to run them in your browser), using QUnit. So far all tests pass on Chrome, Firefox, Opera, Safari and IE. If you're doing something and you run into a bug, file an issue and I can add a test for it, then fix it (in that order).
+There's a battery of tests for the API (visit http://pomax.github.io/pocketknife/test.html to run them in your browser), using QUnit. So far all tests pass on Chrome, Firefox, Opera, Safari and IE. If you're doing something and you run into a bug, file an issue and I can add a test for it, then fix it (in that order).
 
 - Pomax
