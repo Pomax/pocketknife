@@ -7,7 +7,7 @@ One thing it does quite well is not care about whether your selector found zero,
 
 Most functions chain, meaning you can do things like:
 
-    document.body.add(
+    body.add(
       create("div", {id: "temp"}, "This is a temp div")
       .show(false)
     ).find("#temp")
