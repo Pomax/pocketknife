@@ -305,130 +305,132 @@
 
 
   /**
-   * Extend the HTMLElement prototype.
+   * Extend the HTMLElement and SVGElement prototypes.
    */
-  (function($, find){
-    // Array homogenization
-    $.length = 1;
-    // This lets us call forEach irrespective of whether we're
-    // dealing with an HTML element or an array of HTML elements:
-    $.forEach = function(fn) {
-      fn(this);
-      return this;
-    };
-    $.css = function(prop, val) {
-      if(typeof val === "string") {
-        this.style[prop] = val;
-        if (this.get("style") === "") {
-          this.set("style", "");
+  (function(arr, find){
+    arr.forEach(function($) {
+      // Array homogenization
+      $.length = 1;
+      // This lets us call forEach irrespective of whether we're
+      // dealing with an HTML element or an array of HTML elements:
+      $.forEach = function(fn) {
+        fn(this);
+        return this;
+      };
+      $.css = function(prop, val) {
+        if(typeof val === "string") {
+          this.style[prop] = val;
+          if (this.get("style") === "") {
+            this.set("style", "");
+          }
+          return this;
         }
+        if(!val && typeof prop === "object") {
+          for(var p in prop) {
+            if(Object.hasOwnProperty(prop,p)) continue;
+            this.css(p,prop[p]); }
+          return this;
+        }
+        return getComputedStyle(this).getPropertyValue(prop) || this.style[prop];
+      };
+      $.position = function() {
+        return this.getBoundingClientRect();
+      };
+      $.classes = function() {
+        if(!this[classesName]) {
+          this[classesName] = new ClassList(this);
+        }
+        return this[classesName];
+      };
+      $.show = function(yes) {
+        if(yes) { this.set(hiderule,false); }
+        else { this.set(hiderule,"true"); }
         return this;
-      }
-      if(!val && typeof prop === "object") {
-        for(var p in prop) {
-          if(Object.hasOwnProperty(prop,p)) continue;
-          this.css(p,prop[p]); }
+      };
+      $.toggle = function() {
+        this.show(_w.exists(this.get(hiderule)));
         return this;
-      }
-      return getComputedStyle(this).getPropertyValue(prop) || this.style[prop];
-    };
-    $.position = function() {
-      return this.getBoundingClientRect();
-    };
-    $.classes = function() {
-      if(!this[classesName]) {
-        this[classesName] = new ClassList(this);
-      }
-      return this[classesName];
-    };
-    $.show = function(yes) {
-      if(yes) { this.set(hiderule,false); }
-      else { this.set(hiderule,"true"); }
-      return this;
-    };
-    $.toggle = function() {
-      this.show(_w.exists(this.get(hiderule)));
-      return this;
-    };
-    $.html = function(html) {
-      if(_w.exists(html)) {
-        this.innerHTML = html;
-        return this;
-      }
-      return this.innerHTML;
-    };
-    $.parent = function(newParent) {
-      if(newParent) {
-        newParent.add(this);
-        return this;
-      }
-      return this.parentNode;
-    };
-    $.add = function(arg) {
-      if(typeof arg === "string") {
-        this.innerHTML += arg;
-      }
-      else {
-        var e, fn = function(a) { e.add(a); };
-        for(var i=0, last=arguments.length; i<last; i++) {
-          if(_w.exists(arguments[i])) {
-            if(arguments[i] instanceof Array) {
-              e = this;
-              arguments[i].forEach(fn);
-            } else { this.appendChild(arguments[i]); }
+      };
+      $.html = function(html) {
+        if(_w.exists(html)) {
+          this.innerHTML = html;
+          return this;
+        }
+        return this.innerHTML;
+      };
+      $.parent = function(newParent) {
+        if(newParent) {
+          newParent.add(this);
+          return this;
+        }
+        return this.parentNode;
+      };
+      $.add = function(arg) {
+        if(typeof arg === "string") {
+          this.innerHTML += arg;
+        }
+        else {
+          var e, fn = function(a) { e.add(a); };
+          for(var i=0, last=arguments.length; i<last; i++) {
+            if(_w.exists(arguments[i])) {
+              if(arguments[i] instanceof Array) {
+                e = this;
+                arguments[i].forEach(fn);
+              } else { this.appendChild(arguments[i]); }
+            }
           }
         }
-      }
-      return this;
-    };
-    $.replace = function(o,n) {
-      if(typeof o === "string") {
-        var re = new RegExp(o,'g');
-        this.innerHTML = this.innerHTML.replace(re,n);
         return this;
-      }
-      else if(_w.exists(o.parentNode) && _w.exists(n)) {
-        o.parentNode.replaceChild(n,o);
-        return n;
-      }
-      this.parentNode.replaceChild(o,this);
-      return o;
-    };
-    $.remove = function(c) {
-      if(typeof arg === "string") {
-        return this.replace(c,"");
-      }
-      // remove self
-      else if(!_w.exists(c)) { this.parentNode.removeChild(this); }
-      // remove child by number
-      else if(parseInt(c,10)==c) { this.removeChild(this.children[c]); }
-      // remove child by reference
-      else if(c.parentNode && c.parentNode === this) { this.removeChild(c); }
-      return this;
-    };
-    $.clear = function() {
-      this.innerHTML = "";
-      return this;
-    };
-    $.get = function(a) {
-      if(a == parseInt(a,10)) {
-        return this.children[a];
-      }
-      return this.getAttribute(a);
-    };
-    $.set = function(a,b) {
-      if(!_w.exists(b)) {
-        for(var prop in a) {
-          if(!Object.hasOwnProperty(a, prop)) {
-            this.setAttribute(prop, a[prop]);
+      };
+      $.replace = function(o,n) {
+        if(typeof o === "string") {
+          var re = new RegExp(o,'g');
+          this.innerHTML = this.innerHTML.replace(re,n);
+          return this;
+        }
+        else if(_w.exists(o.parentNode) && _w.exists(n)) {
+          o.parentNode.replaceChild(n,o);
+          return n;
+        }
+        this.parentNode.replaceChild(o,this);
+        return o;
+      };
+      $.remove = function(c) {
+        if(typeof arg === "string") {
+          return this.replace(c,"");
+        }
+        // remove self
+        else if(!_w.exists(c)) { this.parentNode.removeChild(this); }
+        // remove child by number
+        else if(parseInt(c,10)==c) { this.removeChild(this.children[c]); }
+        // remove child by reference
+        else if(c.parentNode && c.parentNode === this) { this.removeChild(c); }
+        return this;
+      };
+      $.clear = function() {
+        this.innerHTML = "";
+        return this;
+      };
+      $.get = function(a) {
+        if(a == parseInt(a,10)) {
+          return this.children[a];
+        }
+        return this.getAttribute(a);
+      };
+      $.set = function(a,b) {
+        if(!_w.exists(b)) {
+          for(var prop in a) {
+            if(!Object.hasOwnProperty(a, prop)) {
+              this.setAttribute(prop, a[prop]);
+            }
           }
         }
-      }
-      else if (b === false) { this.removeAttribute(a); }
-      else { this.setAttribute(a, b); }
-      return this;
-    };
-  }(HTMLElement.prototype, find));
+        else if (b === false) { this.removeAttribute(a); }
+        else { this.setAttribute(a, b); }
+        return this;
+      };
+    });
+  }([HTMLElement.prototype, SVGElement.prototype], find));
 
   // IE has no HTMLDocument, so we have to use Document, instead.
   var docPrototype = (_w.HTMLDocument? HTMLDocument.prototype : Document.prototype);
