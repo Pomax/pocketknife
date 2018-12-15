@@ -531,7 +531,7 @@ test( "position", function() {
   var result = div.find("p");
   result = result.position();
   for(var i=0; i<6; i++) {
-    ok(result[i] instanceof ClientRect, "position object found");
+    ok(result[i] instanceof DomRect, "position object found");
   }
   div.remove();
 });
